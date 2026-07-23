@@ -1,0 +1,13 @@
+﻿.env
+__pycache__/
+*.pyc
+*.pth
+*.pt
+*.onnx
+models/*.pt
+models/*.onnx
+eval/results/
+.DS_Store
+.venv/
+venv/
+*.egg-info/
