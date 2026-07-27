@@ -6,3 +6,4 @@ ultralytics==8.4.104
 opencv-python-headless
 numpy
 pillow
+python-multipart
