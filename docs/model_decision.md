@@ -43,3 +43,10 @@ This will be measured on Day 2 with a real deployment.
 - Model: yolov8s-worldv2.pt
 - Source: https://github.com/ultralytics/assets/releases/download/v8.4.0/yolov8s-worldv2.pt
 - Licence: AGPL-3.0
+
+## Render Memory Measurement
+Render free tier does not expose memory or CPU metrics (paid plans only).
+Memory usage could not be measured directly.
+Model size: 338MB. No out-of-memory errors observed during deployment.
+Cold start time: approximately 50-60 seconds on free tier (service spins down after inactivity).
+This is expected behaviour and will be handled in the Streamlit UI with a loading message.
