@@ -7,3 +7,4 @@ opencv-python-headless
 numpy
 pillow
 python-multipart
+git+https://github.com/ultralytics/CLIP.git
