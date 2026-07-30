@@ -119,3 +119,11 @@ an ONNX runtime before further latency tuning. The build logs also show that the
 unrestricted `torch` dependency installs CUDA packages on this CPU-only service,
 creating an approximately 2.8 GB build cache; the replacement deployment should
 remove those unnecessary dependencies.
+
+## CPU-only Runtime Experiment
+
+Started: 2026-07-30 12:50:13 +05:00.
+
+This experiment changes dependencies only: CPU-only PyTorch and Torchvision,
+plus headless OpenCV as the final installed OpenCV distribution. It does not
+change input size, model weights, inference thresholds, or application logic.
