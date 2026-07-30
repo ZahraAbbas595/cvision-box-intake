@@ -50,3 +50,22 @@ Memory usage could not be measured directly.
 Model size: 338MB. No out-of-memory errors observed during deployment.
 Cold start time: approximately 50-60 seconds on free tier (service spins down after inactivity).
 This is expected behaviour and will be handled in the Streamlit UI with a loading message.
+
+## CPU Latency
+
+YOLO-World was benchmarked locally on CPU with PyTorch restricted to one
+thread. Model loading and text-class setup happened before the timed region;
+each value below is wall-clock time for `model.predict`.
+
+| Evaluation image | Wall-clock latency |
+| --- | ---: |
+| `img_001.jpg` | 3.4940 s |
+| `img_002.jpg` | 1.4680 s |
+| `img_003.png` | 0.8762 s |
+| `img_006.jpg` | 0.7393 s |
+| `img_027.jpg` | 0.7914 s |
+| **Mean** | **1.4738 s** |
+
+The mean is below the 5-second decision threshold. CPU inference speed is not
+currently a hard blocker; the Render deployment work should therefore focus
+on reducing memory use. ONNX remains worth testing as a memory optimization.
