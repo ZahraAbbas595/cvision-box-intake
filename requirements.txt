@@ -1,0 +1,10 @@
+﻿fastapi==0.139.2
+uvicorn==0.51.0
+torch
+torchvision
+ultralytics==8.4.104
+opencv-python-headless
+numpy
+pillow
+python-multipart
+git+https://github.com/ultralytics/CLIP.git
