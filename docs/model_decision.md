@@ -97,3 +97,25 @@ Record cold-start time separately from warm inference time. Treat those live
 measurements, along with whether the worker survives, as the decision gate for
 ONNX or a smaller YOLOv8n model. ONNX remains worth testing for both memory and
 latency until that live evidence is available.
+
+## Live Render Inference Test
+
+Commit `d3ebbc1` was deployed successfully from `dev` on the existing Render
+Free instance. The service reached the `Live` state and `GET /health` returned
+HTTP 200 in 0.563 seconds.
+
+The first live inference request used the easy single-box `img_001.jpg` image.
+It returned HTTP 502 after 20.359 seconds. The application produced no completed
+request log, which is consistent with the worker being terminated while loading
+YOLO-World under the free instance's memory limit.
+
+A crowded-image request and warm-latency measurement were not run because the
+worker did not survive the easy request. There is therefore no meaningful warm
+inference latency for the current deployment.
+
+This live result is the deployment decision gate: YOLO-World with the PyTorch
+runtime does not fit the current free service. Proceed with a smaller model or
+an ONNX runtime before further latency tuning. The build logs also show that the
+unrestricted `torch` dependency installs CUDA packages on this CPU-only service,
+creating an approximately 2.8 GB build cache; the replacement deployment should
+remove those unnecessary dependencies.
