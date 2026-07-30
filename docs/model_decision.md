@@ -55,7 +55,9 @@ This is expected behaviour and will be handled in the Streamlit UI with a loadin
 
 YOLO-World was benchmarked locally on CPU with PyTorch restricted to one
 thread. Model loading and text-class setup happened before the timed region;
-each value below is wall-clock time for `model.predict`.
+each value is wall-clock time for `model.predict`.
+
+### Initial five-image run
 
 | Evaluation image | Wall-clock latency |
 | --- | ---: |
@@ -66,6 +68,32 @@ each value below is wall-clock time for `model.predict`.
 | `img_027.jpg` | 0.7914 s |
 | **Mean** | **1.4738 s** |
 
-The mean is below the 5-second decision threshold. CPU inference speed is not
-currently a hard blocker; the Render deployment work should therefore focus
-on reducing memory use. ONNX remains worth testing as a memory optimization.
+### Full 31-image run
+
+The follow-up run covered every evaluation image in filename order.
+
+| Statistic | Wall-clock latency |
+| --- | ---: |
+| Mean | 0.2565 s |
+| Median | 0.2315 s |
+| p95 | 0.5061 s |
+| Maximum (`img_011.jpg`) | 0.7790 s |
+| First prediction (`img_001.jpg`) | 0.5061 s |
+| Warm mean (predictions 2-31) | 0.2482 s |
+| Warm median (predictions 2-31) | 0.2290 s |
+
+The large difference between the two local runs indicates that initialization,
+OS caching, and machine load materially affect these measurements. The slow
+`img_001.jpg` result in the initial run is not evidence of scene complexity:
+that image contains one box and was the first prediction after model setup.
+
+These local results only show that YOLO-World can run with one PyTorch CPU
+thread on the development laptop. One laptop thread does not simulate Render's
+throttled, shared 0.1 vCPU, so CPU speed is not cleared as a deployment risk.
+
+After Render deploys from `dev`, measure a wall-clock POST to the live
+`/v1/box-intake/infer` endpoint with at least one easy and one crowded image.
+Record cold-start time separately from warm inference time. Treat those live
+measurements, along with whether the worker survives, as the decision gate for
+ONNX or a smaller YOLOv8n model. ONNX remains worth testing for both memory and
+latency until that live evidence is available.
