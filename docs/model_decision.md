@@ -127,3 +127,16 @@ Started: 2026-07-30 12:50:13 +05:00.
 This experiment changes dependencies only: CPU-only PyTorch and Torchvision,
 plus headless OpenCV as the final installed OpenCV distribution. It does not
 change input size, model weights, inference thresholds, or application logic.
+
+Completed: 2026-07-30 13:05:55 +05:00 (15 minutes 42 seconds).
+
+Render's build verification confirmed `torch==2.12.1+cpu` with
+`torch.version.cuda == None` and OpenCV 5.0.0 from the headless distribution
+only. The service deployed successfully and `GET /health` returned HTTP 200 in
+0.592 seconds.
+
+The same easy `img_001.jpg` inference request returned HTTP 502 after 38.368
+seconds. Render then reported that the instance exited with status 137. Removing
+unused CUDA libraries and GUI OpenCV therefore did not close the 512 MB memory
+gap. The remaining blocker is the YOLO-World/model runtime footprint, which
+justifies moving to the timeboxed ONNX attempt or the smaller YOLOv8n path.
