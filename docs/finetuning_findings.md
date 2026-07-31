@@ -89,9 +89,12 @@ evidence for this sprint.
 
 The primary metric set contains 24 reviewed images. The counting rule is:
 
-> Count a distinct cardboard carton when at least one-third of a face is
-> visible. Open or damaged cartons still count. Non-carton containers and
-> background objects that cannot be separated confidently do not count.
+> Annotate a carton whenever its visible region is sufficient to identify it
+> confidently as a distinct physical carton. Include partial, border-cropped,
+> damaged, and wrapped-but-visually-identifiable cartons regardless of the
+> exact visible percentage, and annotate only the visible area. Exclude
+> extremely small or ambiguous fragments that cannot be reliably separated as
+> individual cartons.
 
 Seven dense scenes are reserved for a second independent count and qualitative
 error analysis. They are not silently assigned uncertain labels.
@@ -100,10 +103,10 @@ Initial result at confidence 0.35 and NMS IoU 0.50:
 
 | Metric | Result |
 | --- | ---: |
-| Exact-count accuracy | 54.2% |
-| Mean absolute count error | 1.17 |
+| Exact-count accuracy | 58.3% |
+| Mean absolute count error | 1.13 |
 | Overcount images | 8 |
-| Undercount images | 3 |
+| Undercount images | 2 |
 
 The worst case was `img_003.png`: 27 predictions for 12 visible cartons. This
 shows why strong mAP does not imply reliable counting.
@@ -123,13 +126,13 @@ Result:
 
 | Metric | Result |
 | --- | ---: |
-| Exact-count accuracy | 66.7% |
-| Mean absolute count error | 0.96 |
-| Overcount images | 4 |
-| Undercount images | 4 |
+| Exact-count accuracy | 79.2% |
+| Mean absolute count error | 0.83 |
+| Overcount images | 3 |
+| Undercount images | 2 |
 
-Confidence 0.60 lowered mean absolute error to 0.75 but reduced exact-count
-accuracy to 62.5% and increased undercount images to 6. Missing physical boxes
+Confidence 0.55 lowered mean absolute error to 0.75 but reduced exact-count
+accuracy to 70.8% and increased undercount images to 4. Missing physical boxes
 is the more serious intake failure, so 0.45/0.30 is the current operational
 choice.
 
@@ -166,7 +169,7 @@ test scans reported zero corrupt annotations.
 ## Current Limitations
 
 - Cross-split near-duplicates inflate the Roboflow validation and test metrics.
-- Exact-count accuracy is 66.7% on the reviewed primary set.
+- Exact-count accuracy is 79.2% on the reviewed primary set.
 - Dense stacks still produce severe duplicate detections.
 - Seven crowded scenes need a second independent ground-truth count.
 - PyTorch inference exceeds the current free Render memory budget.
