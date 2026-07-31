@@ -9,7 +9,7 @@ models/*.onnx
 !models/carton_yolov8n_best.pt
 eval/results/
 runs/
-dataset/
+/dataset/
 .DS_Store
 .venv/
 venv/
