@@ -5,7 +5,14 @@ import numpy as np
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from app.schemas import HealthResponse, VersionResponse
 from app.services.detector import run_inference
-from app.config import SERVICE_VERSION, MODEL_VERSION, SCHEMA_VERSION, CONF_THRESHOLD, IOU_THRESHOLD
+from app.config import (
+    CONF_THRESHOLD,
+    IOU_THRESHOLD,
+    MODEL_NAME,
+    MODEL_VERSION,
+    SCHEMA_VERSION,
+    SERVICE_VERSION,
+)
 
 app = FastAPI(title='CVision Box Intake API')
 
@@ -17,7 +24,7 @@ def health() -> HealthResponse:
 def version() -> VersionResponse:
     return VersionResponse(
         service_version=SERVICE_VERSION,
-        model_name='yolov8s-worldv2',
+        model_name=MODEL_NAME,
         model_version=MODEL_VERSION,
         schema_version=SCHEMA_VERSION,
     )
@@ -94,7 +101,7 @@ async def infer(file: UploadFile = File(...)) -> dict:
         'confidence_score': confidence_score,
         'human_review_required': len(review_reasons) > 0,
         'review_reasons': review_reasons,
-        'model': {'name': 'yolov8s-worldv2', 'version': MODEL_VERSION,
+        'model': {'name': MODEL_NAME, 'version': MODEL_VERSION,
                   'conf_threshold': CONF_THRESHOLD, 'iou_threshold': IOU_THRESHOLD},
         'service': {'version': SERVICE_VERSION},
         'processing_time_ms': round((time.time() - start_time) * 1000),

@@ -6,7 +6,10 @@ __pycache__/
 *.onnx
 models/*.pt
 models/*.onnx
+!models/carton_yolov8n_best.pt
 eval/results/
+runs/
+dataset/
 .DS_Store
 .venv/
 venv/
