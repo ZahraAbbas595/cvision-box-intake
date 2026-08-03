@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: cvision-box-intake-api
+    runtime: python
+    plan: free
+    buildCommand: bash scripts/render_build.sh
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MODEL_BACKEND
+        value: onnx
+      - key: CONF_THRESHOLD
+        value: 0.48
+      - key: IOU_THRESHOLD
+        value: 0.25
+      - key: PYTHON_VERSION
+        value: 3.11.9
