@@ -45,6 +45,16 @@ def test_infer_rejects_unsupported_file_type(client: TestClient) -> None:
     assert response.json()["detail"] == "Unsupported file type. Send JPEG or PNG."
 
 
+def test_infer_rejects_corrupted_image(client: TestClient) -> None:
+    response = client.post(
+        "/v1/box-intake/infer",
+        files={"file": ("boxes.jpg", b"not a decodable image", "image/jpeg")},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == ("Cannot read image file. It may be corrupted.")
+
+
 def test_infer_returns_structured_count(client: TestClient) -> None:
     image = np.full((100, 100, 3), 255, dtype=np.uint8)
     encoded, buffer = cv2.imencode(".jpg", image)
