@@ -13,6 +13,7 @@ from app.config import (
 
 MODEL_PATH = Path(__file__).resolve().parents[2] / "models" / "carton_yolov8n_best.pt"
 ONNX_MODEL_PATH = MODEL_PATH.with_suffix(".onnx")
+MODEL_STRIDE = 32
 
 
 class Detector(Protocol):
@@ -95,12 +96,21 @@ def _prepare_input(
     resized_width = round(image_width * scale)
     resized_height = round(image_height * scale)
     resized = cv2.resize(image_array, (resized_width, resized_height))
-    pad_x = (INFERENCE_IMAGE_SIZE - resized_width) // 2
-    pad_y = (INFERENCE_IMAGE_SIZE - resized_height) // 2
-    canvas = np.full(
-        (INFERENCE_IMAGE_SIZE, INFERENCE_IMAGE_SIZE, 3), 114, dtype=np.uint8
+    horizontal_padding = (INFERENCE_IMAGE_SIZE - resized_width) % MODEL_STRIDE
+    vertical_padding = (INFERENCE_IMAGE_SIZE - resized_height) % MODEL_STRIDE
+    pad_x = round(horizontal_padding / 2 - 0.1)
+    pad_right = round(horizontal_padding / 2 + 0.1)
+    pad_y = round(vertical_padding / 2 - 0.1)
+    pad_bottom = round(vertical_padding / 2 + 0.1)
+    canvas = cv2.copyMakeBorder(
+        resized,
+        pad_y,
+        pad_bottom,
+        pad_x,
+        pad_right,
+        cv2.BORDER_CONSTANT,
+        value=(114, 114, 114),
     )
-    canvas[pad_y : pad_y + resized_height, pad_x : pad_x + resized_width] = resized
     rgb = cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB)
     tensor = np.transpose(rgb, (2, 0, 1)).astype(np.float32) / 255.0
     return np.expand_dims(tensor, axis=0), scale, pad_x, pad_y

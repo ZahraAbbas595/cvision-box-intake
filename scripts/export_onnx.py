@@ -12,7 +12,7 @@ def main() -> None:
         imgsz=640,
         opset=17,
         simplify=False,
-        dynamic=False,
+        dynamic=True,
     )
     print(f"exported={output_path}")
 
