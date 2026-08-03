@@ -1,6 +1,28 @@
 import numpy as np
 
-from app.services.detector import _decode_output, _nms
+from app.services.detector import _decode_output, _nms, _prepare_input
+
+
+def test_prepare_input_uses_stride_aligned_landscape_shape() -> None:
+    image = np.zeros((501, 762, 3), dtype=np.uint8)
+
+    tensor, scale, pad_x, pad_y = _prepare_input(image)
+
+    assert tensor.shape == (1, 3, 448, 640)
+    assert scale == 640 / 762
+    assert pad_x == 0
+    assert pad_y == 13
+
+
+def test_prepare_input_uses_stride_aligned_portrait_shape() -> None:
+    image = np.zeros((900, 598, 3), dtype=np.uint8)
+
+    tensor, scale, pad_x, pad_y = _prepare_input(image)
+
+    assert tensor.shape == (1, 3, 640, 448)
+    assert scale == 640 / 900
+    assert pad_x == 11
+    assert pad_y == 0
 
 
 def test_decode_output_filters_confidence_and_restores_image_coordinates() -> None:

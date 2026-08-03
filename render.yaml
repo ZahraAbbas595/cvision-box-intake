@@ -9,7 +9,7 @@ services:
       - key: MODEL_BACKEND
         value: onnx
       - key: CONF_THRESHOLD
-        value: 0.48
+        value: 0.47
       - key: IOU_THRESHOLD
         value: 0.25
       - key: PYTHON_VERSION

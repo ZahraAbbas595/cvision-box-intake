@@ -28,54 +28,61 @@ that the service will remain reliable under the free memory limit.
 
 ## ONNX Export and Parity
 
-`scripts/export_onnx.py` exported the committed 6.2 MB PyTorch detector to an
-ignored 12,238,574-byte ONNX file with input shape `[1, 3, 640, 640]` and output
-shape `[1, 5, 8400]`.
+The first export used a fixed `[1, 3, 640, 640]` input. The PyTorch predictor,
+however, uses stride-aligned rectangular inputs for single images: examples in
+the curated set include `[1, 3, 448, 640]`, `[1, 3, 640, 448]`, and
+`[1, 3, 352, 640]`. That preprocessing mismatch explained the five count-parity
+differences even though the exported weights and basic decoding were correct.
 
 The easy single-carton image produced effectively identical detections:
 
 - PyTorch: box `[205, 267, 411, 453]`, confidence `0.954`
 - ONNX Runtime: box `[206, 267, 410, 452]`, confidence `0.955`
 
-Across all 31 curated images, 26 counts matched and five differed. ONNX therefore
-requires its own threshold evidence instead of inheriting PyTorch settings by
-assumption.
+`scripts/export_onnx.py` now exports dynamic spatial dimensions, and the ONNX
+runtime path applies the same stride-32 rectangular letterboxing. At the same
+confidence `0.45` and IoU `0.30` operating point, all 31 curated-image counts
+match PyTorch. Accuracy metrics below use the 24 images with reviewed counts. The dynamic ONNX contract is input
+`[batch, 3, height, width]` with a dynamic anchor dimension in the output.
 
 ## ONNX Threshold Decision
 
-`eval/tune_onnx_thresholds.py` swept confidence `0.35` through `0.55` and NMS
-IoU `0.20` through `0.50` on the 24-image reviewed count set.
+After matching preprocessing, `eval/tune_onnx_thresholds.py` swept confidence
+`0.35` through `0.55` and NMS IoU `0.20` through `0.50` again on the 24-image
+reviewed count set.
 
-The selected Render settings are confidence `0.48` and IoU `0.25`:
+The selected Render settings are confidence `0.47` and IoU `0.25`:
 
 | Metric | ONNX result |
 | --- | ---: |
-| Exact-count images | 18 / 24 |
-| Exact-count accuracy | 75.0% |
-| Mean absolute count error | 0.75 |
+| Exact-count images | 19 / 24 |
+| Exact-count accuracy | 79.2% |
+| Mean absolute count error | 0.79 |
 | Overcount images | 3 |
-| Undercount images | 3 |
+| Undercount images | 2 |
 
-No tested ONNX threshold recovered the PyTorch operating point's 19 / 24 exact
-counts. The deployment tradeoff is explicit: lower count accuracy is accepted
-only for the free-tier memory experiment, with human review routing preserved.
+This recovers the PyTorch operating point's 19 / 24 exact counts while retaining
+the lightweight ONNX Runtime deployment. The remaining five errors are model or
+scene failures shared with PyTorch: one crowded overcount, two fragmented-carton
+overcounts, and two missed cartons. They are not caused by ONNX conversion.
 
 ## Local Isolated Runtime Benchmark
 
 Each backend was measured in a fresh process over all 31 curated images:
 
-| Measurement | ONNX Runtime | PyTorch |
+| Measurement | Dynamic ONNX Runtime | PyTorch |
 | --- | ---: | ---: |
 | RSS before model load | 35.8 MB | 35.8 MB |
-| RSS after model load | 71.1 MB | 424.0 MB |
-| Peak RSS | 228.1 MB | 713.0 MB |
-| Model load | 0.2395 s | 2.9532 s |
-| Cold inference | 0.1401 s | 1.9191 s |
-| Warm mean | 0.1257 s | 0.0851 s |
+| RSS after model load | 70.7 MB | 424.0 MB |
+| Peak RSS | 200.5 MB | 713.0 MB |
+| Model load | 0.2436 s | 2.9532 s |
+| Cold inference | 0.0979 s | 1.9191 s |
+| Warm mean across mixed shapes | 0.2603 s | 0.0851 s |
 
-The local ONNX peak is 283.9 MB below the 512 MB free-tier gate. This makes
-ONNX eligible for a live Render test; it does not replace the required live
-measurement because operating-system and platform overhead differ.
+The dynamic ONNX peak is 311.5 MB below the 512 MB free-tier gate. Mixed-shape
+evaluation is slower than the fixed-shape benchmark because the runtime handles
+several tensor shapes, but memory remains well within the free-tier constraint.
+This local result does not replace a post-deployment live Render measurement.
 
 ## Targeted Count-Risk Experiment
 

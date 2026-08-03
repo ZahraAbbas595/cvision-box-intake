@@ -24,7 +24,16 @@ import onnxruntime
 model_path = Path("models/carton_yolov8n_best.onnx")
 if not model_path.exists():
     raise SystemExit(f"Missing exported model: {model_path}")
+session = onnxruntime.InferenceSession(
+    str(model_path),
+    providers=["CPUExecutionProvider"],
+)
+input_shape = session.get_inputs()[0].shape
+output_shape = session.get_outputs()[0].shape
+if input_shape != ["batch", 3, "height", "width"]:
+    raise SystemExit(f"Unexpected ONNX input contract: {input_shape}")
 print(f"Verified onnxruntime={onnxruntime.__version__}")
 print(f"Verified opencv={cv2.__version__}, headless-only")
 print(f"Verified model={model_path}, bytes={model_path.stat().st_size}")
+print(f"Verified input_shape={input_shape}, output_shape={output_shape}")
 PY

@@ -21,4 +21,6 @@ The format follows Keep a Changelog, and releases use Semantic Versioning.
 
 - Replaced the YOLO-World detector with the fine-tuned carton detector.
 - Set PyTorch operating thresholds to confidence 0.45 and NMS IoU 0.30.
-- Set free-Render ONNX thresholds to confidence 0.48 and NMS IoU 0.25.
+- Export ONNX with dynamic spatial dimensions and use stride-aligned rectangular
+  preprocessing to match the PyTorch inference path.
+- Set free-Render ONNX thresholds to confidence 0.47 and NMS IoU 0.25.
