@@ -45,7 +45,6 @@ from being hidden behind the signed count error.
 | Unsupported or out-of-distribution scene | `img_022` | 1 | Stylized red carton, saturated lighting, and very low resolution differ from typical training examples. |
 | Possible visible damage | `img_023` | 1 | A torn carton is detected as two carton regions. Damage is context, not a separately supported model output. |
 | No useful detection | `img_022` | 1 | Zero cartons are returned for a one-carton scene. |
-| Ground-truth disagreement | `img_030` | 1 | The stored count of one conflicts with the current rule because multiple partial cartons appear identifiable. |
 | Poor image quality | None confirmed | 0 | `img_022` is small and stylized, but the dominant issue is domain shift rather than decode corruption. |
 | Incorrect size class | Not assessed | — | The current manifest does not contain independently reviewed size-class ground truth. |
 
@@ -103,19 +102,17 @@ fragmentation heuristic may help, but must not merge genuinely adjacent cartons.
 
 ### `img_030.jpg`: 1 recorded, 5 predicted
 
-Status: **ground truth requires human re-review before model scoring**.
+Status: **confirmed fragmentation/duplicate-detection error**.
 
-The overlay contains fragmented regions on the dominant foreground carton, but
-the source also shows partial cartons at the lower-left edge and in the
-background. Under the current identity-based counting rule, at least some of
-those partial cartons may count. Treating all four excess detections as model
-false positives would overstate the model error before the expected count is
-reviewed consistently.
+Human review confirms that the image contains one distinct physical carton.
+The other visible regions are not reliably separable as additional cartons
+under the identity-based counting rule. The model returns five adjacent or
+overlapping detections across visible faces and fragments of that one carton,
+creating four false-positive inventory units.
 
-Operational impact: inconsistent annotation policy can distort both threshold
-selection and the apparent value of post-processing. This image remains in the
-reported metrics for traceability, but any post-processing experiment must show
-results both with and without it until its count is resolved.
+Operational impact: one carton becomes five inventory units. This is the
+strongest case for testing a conservative fragmentation review flag, while
+avoiding automatic merges that could collapse genuinely adjacent cartons.
 
 ## What Changed After Reviewing the Errors
 
@@ -125,18 +122,17 @@ results both with and without it until its count is resolved.
 2. Global NMS tightening is not the next default change. It cannot remove the
    high-confidence window false positives in `img_003`, and adjacent fragments
    in `img_023` have little overlap.
-3. Error analysis is now multi-label and distinguishes model errors from
-   ground-truth disagreements.
-4. `img_030` is flagged for human recount under the current rule rather than
-   silently accepted as four false positives.
+3. Error analysis is multi-label so one image can expose several related model
+   failure modes without changing its reviewed ground truth.
+4. Human review confirms `img_030` contains one carton; its four excess counts
+   are classified as fragmented or duplicate detections.
 
 ## Next Experiments
 
 Run each experiment against the complete reviewed set and reject it if exact
 count accuracy or undercount frequency worsens materially.
 
-1. Re-review `img_030` and obtain independent counts for the seven reserved
-   crowded scenes.
+1. Obtain independent counts for the seven reserved crowded scenes.
 2. Measure box-pair geometry on `img_023` and `img_030` to test a conservative
    adjacent-fragment review flag before attempting automatic merging.
 3. Add a review reason for suspicious repeated rectangular detections or a
@@ -150,7 +146,6 @@ count accuracy or undercount frequency worsens materially.
 ## Limitations
 
 - This is a 24-image reviewed count set, not warehouse-scale validation.
-- One of the five error images has unresolved ground truth.
 - Seven crowded images await a second independent count.
 - Size-class errors cannot be measured until size ground truth is reviewed.
 - Damage is not a supported detection task; it is contextual evidence for human
