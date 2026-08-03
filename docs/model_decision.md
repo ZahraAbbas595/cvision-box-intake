@@ -140,3 +140,19 @@ seconds. Render then reported that the instance exited with status 137. Removing
 unused CUDA libraries and GUI OpenCV therefore did not close the 512 MB memory
 gap. The remaining blocker is the YOLO-World/model runtime footprint, which
 justifies moving to the timeboxed ONNX attempt or the smaller YOLOv8n path.
+
+## Updated Decision: Fine-Tuned YOLOv8n Candidate
+
+The Roboflow carton dataset made the smaller-model path feasible. A YOLOv8n
+detector was fine-tuned for 50 epochs and selected as the candidate application
+model. The selected artifact is 6.22 MB and is versioned at
+`models/carton_yolov8n_best.pt`.
+
+Independent count evaluation, leakage analysis, threshold evidence, and the
+deployment-memory gate are documented in
+[`finetuning_findings.md`](finetuning_findings.md).
+
+The current API thresholds are confidence 0.45 and NMS IoU 0.30 because they
+maximize exact-count accuracy on the deployment-faithful curated evaluation
+run. The model is integrated on `feat/carton-finetuning`; it is not yet cleared
+for Render because local PyTorch inference peaked at 697.7 MB RSS.

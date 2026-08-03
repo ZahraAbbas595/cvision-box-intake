@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "counting_rule": "Annotate a carton whenever its visible region is sufficient to identify it confidently as a distinct physical carton. Include partial, border-cropped, damaged, and wrapped-but-visually-identifiable cartons regardless of the exact visible percentage, and annotate only the visible area. Exclude extremely small or ambiguous fragments that cannot be reliably separated as individual cartons. Wooden crates, luggage, plastic containers, and furniture are not cartons.",
+  "review_status": "Primary metric set reviewed from full-resolution images. Crowded scenes requiring an independent second count are listed separately and excluded from primary metrics.",
+  "images": {
+    "img_001.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "",
+      "notes": "Single isolated carton."
+    },
+    "img_002.jpg": {
+      "expected_visible_count": 4,
+      "ambiguity": "",
+      "notes": "Four distinct cartons in a pyramid."
+    },
+    "img_003.png": {
+      "expected_visible_count": 12,
+      "ambiguity": "Several cartons overlap in the right-hand stack.",
+      "notes": "Wooden crates at lower left are excluded."
+    },
+    "img_004.png": {
+      "expected_visible_count": 2,
+      "ambiguity": "",
+      "notes": "The large foreground carton and the shrink-wrapped carton on the background pallet both count."
+    },
+    "img_007.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "",
+      "notes": "Single open carton."
+    },
+    "img_008.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "",
+      "notes": "Single isolated carton."
+    },
+    "img_009.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "",
+      "notes": "Single isolated carton."
+    },
+    "img_010.jpg": {
+      "expected_visible_count": 4,
+      "ambiguity": "",
+      "notes": "Four distinct cartons."
+    },
+    "img_012.jpg": {
+      "expected_visible_count": 4,
+      "ambiguity": "The person partially occludes the stack.",
+      "notes": "Four cartons remain visibly separable."
+    },
+    "img_013.jpg": {
+      "expected_visible_count": 8,
+      "ambiguity": "",
+      "notes": "Eight distinct cartons."
+    },
+    "img_014.jpg": {
+      "expected_visible_count": 9,
+      "ambiguity": "",
+      "notes": "Nine distinct cartons."
+    },
+    "img_015.jpg": {
+      "expected_visible_count": 6,
+      "ambiguity": "",
+      "notes": "Six distinct cartons."
+    },
+    "img_016.jpg": {
+      "expected_visible_count": 2,
+      "ambiguity": "One carton is out of focus in the background.",
+      "notes": "Open foreground carton and closed background carton both count."
+    },
+    "img_017.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "",
+      "notes": "Red luggage and plastic containers are excluded."
+    },
+    "img_018.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "",
+      "notes": "Single open carton."
+    },
+    "img_019.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "",
+      "notes": "Single isolated carton in hard directional light."
+    },
+    "img_020.jpg": {
+      "expected_visible_count": 2,
+      "ambiguity": "Low-light scene.",
+      "notes": "Two stacked cartons."
+    },
+    "img_021.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "Carton is cut off by the image edges.",
+      "notes": "One large carton."
+    },
+    "img_022.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "Stylized lighting and open flaps.",
+      "notes": "One open carton."
+    },
+    "img_023.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "Carton is visibly damaged.",
+      "notes": "Damage does not change the visible-carton count."
+    },
+    "img_024.jpg": {
+      "expected_visible_count": 0,
+      "ambiguity": "",
+      "notes": "Negative scene with no cartons."
+    },
+    "img_025.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "",
+      "notes": "Single isolated carton."
+    },
+    "img_029.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "The carton contains non-box objects.",
+      "notes": "The container itself counts as one carton."
+    },
+    "img_030.jpg": {
+      "expected_visible_count": 1,
+      "ambiguity": "",
+      "notes": "Single isolated carton."
+    }
+  },
+  "excluded_pending_second_review": {
+    "img_005.jpg": "Crowded household scene with partially hidden cartons.",
+    "img_006.jpg": "Dense overlapping stack; exact boundary count needs a second reviewer.",
+    "img_011.jpg": "Large stack with several partial boundaries.",
+    "img_026.jpg": "Cluttered mixed-object scene with partially hidden cartons.",
+    "img_027.jpg": "Very dense warehouse stack.",
+    "img_028.jpg": "Stacked moving scene with partial cartons and occlusion.",
+    "img_031.jpg": "Overlapping moving cartons with uncertain rear boundaries."
+  }
+}

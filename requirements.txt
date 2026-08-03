@@ -8,4 +8,3 @@ opencv-python-headless==5.0.0.93
 numpy
 pillow
 python-multipart
-git+https://github.com/ultralytics/CLIP.git
