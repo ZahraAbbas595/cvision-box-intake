@@ -97,7 +97,15 @@ rule remains responsible for the confirmed `img_030` multi-fragment case.
 ONNX thresholds. `scripts/render_build.sh` exports ONNX from the committed model,
 then removes Torch and Ultralytics before the service starts.
 
-After the branch is deployed, run:
+The merged deployment was validated on the existing Render Free web service on
+2026-08-03. The service reported backend `onnx`; `img_001.jpg` returned HTTP 200
+with one carton and 169.4 MB peak RSS. Three consecutive requests using crowded
+`img_003.png` returned 23 cartons with the expected edge and high-count review
+reasons. Peak RSS stabilized at 194.4 MB, leaving 317.6 MB of headroom below the
+512 MB gate. Server processing time for those warm crowded requests was 883-1060
+ms, with no worker restart or memory growth after the second request.
+
+The deployment gate can be repeated with:
 
 ```bash
 python scripts/smoke_render.py \
