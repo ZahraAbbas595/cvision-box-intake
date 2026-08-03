@@ -104,13 +104,26 @@ rule remains responsible for the confirmed `img_030` multi-fragment case.
 ONNX thresholds. `scripts/render_build.sh` exports ONNX from the committed model,
 then removes Torch and Ultralytics before the service starts.
 
-The merged deployment was validated on the existing Render Free web service on
-2026-08-03. The service reported backend `onnx`; `img_001.jpg` returned HTTP 200
-with one carton and 169.4 MB peak RSS. Three consecutive requests using crowded
-`img_003.png` returned 23 cartons with the expected edge and high-count review
-reasons. Peak RSS stabilized at 194.4 MB, leaving 317.6 MB of headroom below the
-512 MB gate. Server processing time for those warm crowded requests was 883-1060
-ms, with no worker restart or memory growth after the second request.
+The initial fixed-shape ONNX deployment was validated on 2026-08-03. It peaked
+at 194.4 MB RSS during repeated crowded requests, leaving 317.6 MB below the
+512 MB gate.
+
+After PR #10, the dynamic-shape deployment was validated again on Render Free.
+Render retained the manually configured confidence `0.48` despite the blueprint
+change, so the service environment was aligned to the measured `0.47` value and
+rebuilt without changing the plan or any other variable. Live response metadata
+then confirmed backend `onnx`, confidence `0.47`, and IoU `0.25`.
+
+All post-deployment requests returned HTTP 200:
+
+- `img_018.jpg` recovered from zero to one carton, confirming the parity fix.
+- `img_001.jpg` returned one carton in 467 ms with 160.9 MB peak RSS.
+- crowded `img_003.png` returned 24 cartons in 575 ms with the expected edge and
+  high-count review reasons.
+
+Peak RSS across the final gates was 163.2 MB, leaving 348.8 MB below the 512 MB
+limit. No paid-plan change, worker restart, or automatic detection merge was
+needed.
 
 The deployment gate can be repeated with:
 
