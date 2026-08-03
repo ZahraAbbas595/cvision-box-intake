@@ -2,26 +2,29 @@
 set -euo pipefail
 
 python -m pip install -r requirements.txt
+python -m pip install onnx==1.19.0
+python scripts/export_onnx.py
 
-# Ultralytics declares the GUI OpenCV distribution as a dependency. Replace it
-# after dependency resolution so the CPU-only service contains one cv2 wheel.
-python -m pip uninstall -y opencv-python
-python -m pip install \
-  --no-deps \
-  --force-reinstall \
-  opencv-python-headless==5.0.0.93
+# Build with the committed PyTorch model, then remove the export-only stack so
+# the free 512 MB service imports ONNX Runtime without Torch or Ultralytics.
+python -m pip uninstall -y torch torchvision ultralytics onnx opencv-python
+python -m pip install --force-reinstall -r requirements-render.txt
 
-if python -m pip show opencv-python >/dev/null 2>&1; then
-  echo "opencv-python must not be installed on the Render service." >&2
+if python -m pip show torch ultralytics opencv-python >/dev/null 2>&1; then
+  echo "Export-only or GUI inference packages remain installed." >&2
   exit 1
 fi
 
 python - <<'PY'
-import cv2
-import torch
+from pathlib import Path
 
-print(f"Verified torch={torch.__version__}, cuda={torch.version.cuda}")
+import cv2
+import onnxruntime
+
+model_path = Path("models/carton_yolov8n_best.onnx")
+if not model_path.exists():
+    raise SystemExit(f"Missing exported model: {model_path}")
+print(f"Verified onnxruntime={onnxruntime.__version__}")
 print(f"Verified opencv={cv2.__version__}, headless-only")
-if torch.version.cuda is not None:
-    raise SystemExit("Expected a CPU-only PyTorch build.")
+print(f"Verified model={model_path}, bytes={model_path.stat().st_size}")
 PY
