@@ -9,11 +9,7 @@ from app.config import CONF_THRESHOLD, IOU_THRESHOLD
 torch.set_num_threads(1)
 
 _model: YOLO | None = None
-MODEL_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "models"
-    / "carton_yolov8n_best.pt"
-)
+MODEL_PATH = Path(__file__).resolve().parents[2] / "models" / "carton_yolov8n_best.pt"
 
 
 def get_model() -> YOLO:
