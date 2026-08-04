@@ -18,6 +18,7 @@ from app.services.detector import run_inference
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse reviewed manifest, image directory, and report destination."""
     parser = argparse.ArgumentParser(description="Analyze count-risk review flags.")
     parser.add_argument(
         "--ground-truth",
@@ -34,6 +35,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Measure review-flag coverage for exact and incorrect count scenes."""
     args = parse_args()
     manifest = json.loads(args.ground_truth.read_text(encoding="utf-8"))
     rows: list[dict[str, object]] = []

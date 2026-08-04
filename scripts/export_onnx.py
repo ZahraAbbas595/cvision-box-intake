@@ -6,6 +6,7 @@ MODEL_PATH = Path("models/carton_yolov8n_best.pt")
 
 
 def main() -> None:
+    """Export the selected detector with dynamic ONNX spatial dimensions."""
     model = YOLO(MODEL_PATH)
     output_path = model.export(
         format="onnx",

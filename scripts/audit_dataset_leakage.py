@@ -11,13 +11,14 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageOps
 
-
 ROOT = Path(__file__).resolve().parents[1]
 IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
 
 @dataclass(frozen=True)
 class ImageFingerprint:
+    """Comparable identity and perceptual features for one image."""
+
     path: Path
     sha256: str
     pixel_sha256: str
@@ -25,6 +26,7 @@ class ImageFingerprint:
 
 
 def iter_images(directory: Path) -> list[Path]:
+    """Return supported image files in deterministic path order."""
     return sorted(
         path
         for path in directory.iterdir()
@@ -33,6 +35,7 @@ def iter_images(directory: Path) -> list[Path]:
 
 
 def difference_hash(image: Image.Image, size: int = 8) -> int:
+    """Calculate a compact horizontal perceptual difference hash."""
     grayscale = ImageOps.exif_transpose(image).convert("L")
     resized = grayscale.resize((size + 1, size), Image.Resampling.LANCZOS)
     pixels = list(resized.getdata())
@@ -47,6 +50,7 @@ def difference_hash(image: Image.Image, size: int = 8) -> int:
 
 
 def fingerprint(path: Path) -> ImageFingerprint:
+    """Build exact and perceptual fingerprints for an image file."""
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     with Image.open(path) as image:
         normalized = ImageOps.exif_transpose(image).convert("RGB")
@@ -61,6 +65,8 @@ def fingerprint(path: Path) -> ImageFingerprint:
 
 
 def normalized_pixel_mae(first: Path, second: Path, size: int = 128) -> float:
+    """Measure resized RGB pixel difference normalized to zero through one."""
+
     def normalized_pixels(path: Path) -> np.ndarray:
         with Image.open(path) as image:
             normalized = ImageOps.exif_transpose(image).convert("RGB")
@@ -75,6 +81,7 @@ def compare_splits(
     candidate: list[ImageFingerprint],
     max_distance: int,
 ) -> list[tuple[ImageFingerprint, ImageFingerprint, int, bool, bool]]:
+    """Find exact and near-duplicate images across two dataset splits."""
     matches: list[tuple[ImageFingerprint, ImageFingerprint, int, bool, bool]] = []
     for candidate_image in candidate:
         best_reference = min(
@@ -98,6 +105,7 @@ def compare_splits(
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse dataset location and perceptual duplicate threshold."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", type=Path, default=ROOT / "dataset")
     parser.add_argument("--max-distance", type=int, default=5)
@@ -110,11 +118,11 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Audit configured dataset splits and report potential leakage pairs."""
     args = parse_args()
     splits = {
         split: [
-            fingerprint(path)
-            for path in iter_images(args.dataset / split / "images")
+            fingerprint(path) for path in iter_images(args.dataset / split / "images")
         ]
         for split in ("train", "valid", "test")
     }

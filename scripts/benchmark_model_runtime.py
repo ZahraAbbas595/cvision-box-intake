@@ -12,11 +12,11 @@ import psutil
 import torch
 from ultralytics import YOLO
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse model, image, repeat, and runtime benchmark settings."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--model",
@@ -35,16 +35,19 @@ def parse_args() -> argparse.Namespace:
 
 
 def rss_mb() -> float:
+    """Return current process resident memory in megabytes."""
     return psutil.Process(os.getpid()).memory_info().rss / (1024 * 1024)
 
 
 def percentile(values: list[float], fraction: float) -> float:
+    """Return a nearest-rank percentile from a non-empty value list."""
     ordered = sorted(values)
     index = min(round((len(ordered) - 1) * fraction), len(ordered) - 1)
     return ordered[index]
 
 
 def main() -> None:
+    """Benchmark detector latency and memory under repeatable settings."""
     args = parse_args()
     images = sorted(
         path

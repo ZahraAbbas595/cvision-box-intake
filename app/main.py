@@ -40,11 +40,13 @@ logger = logging.getLogger("uvicorn.error")
 
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
+    """Return a lightweight service liveness response."""
     return HealthResponse(status="ok")
 
 
 @app.get("/version", response_model=VersionResponse)
 def version() -> VersionResponse:
+    """Return the deployed service, schema, model, and backend versions."""
     return VersionResponse(
         service_version=SERVICE_VERSION,
         model_name=MODEL_NAME,
@@ -56,6 +58,7 @@ def version() -> VersionResponse:
 
 @app.post("/v1/box-intake/infer")
 async def infer(response: Response, file: UploadFile = File(...)) -> dict:
+    """Validate an uploaded image and return carton-intake evidence."""
     start_time = time.time()
     request_id = str(uuid.uuid4())
     response.headers["X-Request-ID"] = request_id

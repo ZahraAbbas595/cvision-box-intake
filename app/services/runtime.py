@@ -13,6 +13,7 @@ def _read_proc_memory_mb(field: str) -> float | None:
 
 
 def memory_snapshot() -> dict[str, float | None]:
+    """Return current and peak Linux process RSS values when available."""
     return {
         "current_rss_mb": _read_proc_memory_mb("VmRSS"),
         "peak_rss_mb": _read_proc_memory_mb("VmHWM"),

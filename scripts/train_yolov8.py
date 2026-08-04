@@ -8,11 +8,11 @@ from pathlib import Path
 import torch
 from ultralytics import YOLO
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse dataset, training, and output settings."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data", type=Path, default=ROOT / "dataset" / "data.yaml")
     parser.add_argument("--model", default=str(ROOT / "yolov8n.pt"))
@@ -27,6 +27,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Fine-tune the configured YOLOv8 model on the carton dataset."""
     args = parse_args()
     device = args.device or ("0" if torch.cuda.is_available() else "cpu")
     model = YOLO(args.model)

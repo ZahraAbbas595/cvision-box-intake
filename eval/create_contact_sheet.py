@@ -8,11 +8,11 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse image inputs and contact-sheet layout settings."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--images",
@@ -31,6 +31,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Create a labelled contact sheet for visual evaluation review."""
     args = parse_args()
     image_paths = sorted(
         path
