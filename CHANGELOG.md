@@ -15,6 +15,8 @@ available.
   handoff guidance.
 - Reproducibility and cleanup inventory for periodic repository maintenance.
 - Public-boundary docstrings for the application and supported utility scripts.
+- Module-level docstrings across supported application, evaluation, and
+  operational Python modules.
 
 ### Changed
 

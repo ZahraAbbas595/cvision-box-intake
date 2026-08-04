@@ -68,6 +68,7 @@ def normalized_pixel_mae(first: Path, second: Path, size: int = 128) -> float:
     """Measure resized RGB pixel difference normalized to zero through one."""
 
     def normalized_pixels(path: Path) -> np.ndarray:
+        """Load one image as an orientation-corrected normalized RGB array."""
         with Image.open(path) as image:
             normalized = ImageOps.exif_transpose(image).convert("RGB")
             resized = normalized.resize((size, size), Image.Resampling.LANCZOS)

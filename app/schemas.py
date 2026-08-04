@@ -1,3 +1,5 @@
+"""Pydantic response schemas for the public API contract."""
+
 from pydantic import BaseModel
 
 

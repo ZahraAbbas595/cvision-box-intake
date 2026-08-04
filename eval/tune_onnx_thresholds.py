@@ -1,3 +1,5 @@
+"""Tune ONNX confidence and IoU thresholds against reviewed carton counts."""
+
 import argparse
 import csv
 import json
