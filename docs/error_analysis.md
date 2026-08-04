@@ -53,12 +53,37 @@ silently removed from reporting.
 | `img_030.jpg` | 1 | 5 | +4 | One physical carton severely fragmented across visible regions. |
 | `img_031.jpg` | 9 | 7 | -2 | Overlap and foreground occlusion cause misses. |
 
+## Error Taxonomy
+
+The taxonomy is multi-label: one image can contribute to more than one category
+when, for example, occlusion causes a missed carton. Counts below cover the 13
+incorrect-count images at the deployed operating point.
+
+| Category | Images | Count | Interpretation |
+| --- | --- | ---: | --- |
+| Missed box | `005`, `012`, `022`, `026`, `027`, `028`, `031` | 7 | One or more visible cartons were not detected. |
+| Duplicate or fragmented box | `013`, `023`, `030` | 3 | One physical carton produced multiple accepted detections. |
+| Non-box detected as box | `003`, `016`, `020` | 3 | Background geometry, clutter, or reflection created a false carton. |
+| Partially hidden or overlapping box | `005`, `012`, `026`, `027`, `028`, `031` | 6 | Occlusion contributed to an undercount. |
+| Incorrect size class | Not measured | 0 evaluated | Reviewed localization and size-class labels are not available. |
+| Poor image quality or lighting | `005`, `020` | 2 observed | Shadow or low light contributed to ambiguity; no independent quality classifier is claimed. |
+| Unsupported scene | `020` | 1 | Reflection creates a visually inseparable false carton. |
+| Possible visible damage | `023`, `030` | 2 | Damage or separated visible regions contributed to fragmentation. |
+| No useful detection | `022` | 1 | A visible stylized carton received zero detections. |
+
+This table classifies observed failures rather than claiming that every listed
+condition can be detected automatically.
+
 ## Representative Sprint Examples
 
 These five examples provide a concise demonstration set. Generated overlays
-remain evaluation artifacts and are not committed.
+remain evaluation artifacts and are not committed. The source images below are
+already tracked evaluation evidence; predicted and expected counts are stated
+beside each image.
 
 ### `img_006.jpg`: dense-scene success
+
+![Dense carton stack with an exact count](../eval/dataset/images/img_006.jpg)
 
 - Expected: 25
 - Predicted: 25
@@ -66,6 +91,8 @@ remain evaluation artifacts and are not committed.
   count; scene difficulty alone does not determine failure.
 
 ### `img_010.jpg`: clear multi-carton success
+
+![Four clearly separated cartons](../eval/dataset/images/img_010.jpg)
 
 - Expected: 4
 - Predicted: 4
@@ -75,6 +102,8 @@ remain evaluation artifacts and are not committed.
 
 ### `img_003.png`: severe overcount
 
+![Crowded backlit scene that produces false positives](../eval/dataset/images/img_003.png)
+
 - Expected: 11
 - Predicted: 24
 - Rectangular window/background regions and crowded geometry create phantom
@@ -82,12 +111,16 @@ remain evaluation artifacts and are not committed.
 
 ### `img_027.jpg`: severe undercount
 
+![Dense warehouse stack that produces an undercount](../eval/dataset/images/img_027.jpg)
+
 - Expected: 58
 - Predicted: 47
 - Small, overlapping, partial, and border cartons are missed in a very dense
   warehouse stack. This should be presented as a high-risk review scene.
 
 ### `img_020.jpg`: unsupported reflection scene
+
+![Single carton with a reflection that resembles a second carton](../eval/dataset/images/img_020.jpg)
 
 - Expected: 1
 - Predicted: 2
@@ -119,6 +152,22 @@ Candidate rules must be tested offline against all 31 images before deployment:
 A candidate rule is useful when it catches meaningful count-risk cases with an
 acceptable review burden. Operational review flags are not accuracy fixes and
 must not be presented as corrected counts.
+
+### Implemented Rule Coverage
+
+| Implemented reason | Signal | Operational purpose |
+| --- | --- | --- |
+| `no_boxes_detected` | Accepted count is zero | Routes complete misses for review. |
+| `low_confidence_detection` | Any accepted confidence is below `0.45` | Exposes weak individual detections. |
+| `boxes_cut_off_at_edge` | More than 20% of detections touch the frame | Flags border truncation and possible missed carton extent. |
+| `high_detection_count` | At least 12 detections | Routes crowded scenes where overlap and occlusion increase count risk. |
+| `possible_fragmented_detections` | A small detection set contains adjacent, aligned fragments | Flags possible duplicate regions without merging detections. |
+
+The fragment rule is deliberately not described as a general occlusion detector.
+Crowded overlap is currently represented conservatively by high-count and edge
+signals because no validated image-level occlusion classifier exists. This
+keeps the operational decision independent of confidence without claiming a
+capability the prototype has not demonstrated.
 
 ## What Changed After Review
 

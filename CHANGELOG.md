@@ -22,6 +22,8 @@ available.
 
 - Clarified which files are supported workflow components, generated artifacts,
   historical spikes, and unresolved sprint gaps.
+- Completed the Week 2 error taxonomy, visual evidence links, review-rule
+  coverage notes, and endpoint/review regression tests.
 
 ### Removed
 
