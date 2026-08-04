@@ -1,5 +1,9 @@
 # Carton Detector Fine-Tuning Findings
 
+> **Historical model-selection evidence:** count metrics in this document use
+> the earlier partial review set. Use `docs/error_analysis.md` for the current
+> complete 31-image human-reviewed evaluation.
+
 ## Decision
 
 The project now uses a fine-tuned YOLOv8n detector as the candidate replacement

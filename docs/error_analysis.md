@@ -2,151 +2,145 @@
 
 ## Scope
 
-This analysis covers the 24-image primary count set at the selected operating
-point of confidence `0.45`, NMS IoU `0.30`, and inference size `640`. Nineteen
-images have exact counts. The five non-exact images are reviewed below against
-the full-resolution source and saved prediction overlay.
+This analysis covers all 31 evaluation images at the deployed ONNX operating
+point of confidence `0.47`, NMS IoU `0.25`, and inference size `640`. All counts
+were reviewed from the full-resolution images. Eighteen images have exact
+counts and thirteen do not.
 
-The seven crowded scenes reserved for a second independent count are not used
-here. The Roboflow validation and test metrics are also not used as count
-evidence because the leakage audit found cross-split near-duplicates.
+The dataset intentionally retains difficult and unsupported examples. Results
+are therefore reported both for the complete set and for the supported-scene
+subset that excludes only the documented reflection case, `img_020.jpg`.
 
 ## Counting Rule
 
-A carton counts whenever the visible region identifies it confidently as a
-distinct physical carton. Partial, border-cropped, damaged, and wrapped but
-visually identifiable cartons count. Only the visible area should be
-annotated. Extremely small or ambiguous fragments that cannot be separated
-reliably are excluded.
+A carton counts whenever its visible region identifies it confidently as a
+distinct physical carton. Partial, border-cropped, damaged, open, and wrapped
+but visually identifiable cartons count. Extremely small or ambiguous
+fragments that cannot be separated reliably are excluded. A shadow or
+reflection does not create another physical carton.
 
-## Current Count Results
+## Count Results
 
-| Metric | Result |
-| --- | ---: |
-| Reviewed images | 24 |
-| Exact-count images | 19 |
-| Exact-count accuracy | 79.2% |
-| Mean absolute count error | 0.83 |
-| Overcount images | 3 |
-| Undercount images | 2 |
+| Metric | Full set | Supported scenes |
+| --- | ---: | ---: |
+| Reviewed images | 31 | 30 |
+| Exact-count images | 18 | 18 |
+| Exact-count accuracy | 58.1% | 60.0% |
+| Mean absolute count error | 1.42 | 1.43 |
+| Overcount images | 6 | 5 |
+| Undercount images | 7 | 7 |
 
-## Failure Frequency
+The full-set result is the primary honest dataset result. The supported-scene
+result answers a narrower question: how the detector performs after applying a
+predeclared operational limitation. `img_020.jpg` is not deleted and is not
+silently removed from reporting.
 
-The taxonomy is multi-label: one image may expose more than one failure mode.
-This prevents a secondary problem, such as damage or annotation disagreement,
-from being hidden behind the signed count error.
+## Incorrect Counts
 
-| Failure category | Images | Frequency | Evidence |
-| --- | --- | ---: | --- |
-| Missed carton | `img_012`, `img_022` | 2 | One partially obscured carton and one stylized open carton are not detected. |
-| Duplicate or fragmented carton | `img_023`, `img_030` | 2 | One physical carton is represented by adjacent detections. |
-| Non-carton detected | `img_003` | 1 | Window panes are repeatedly classified as cartons. |
-| Partially hidden carton | `img_012` | 1 | The small upper carton is partly occluded by the person. |
-| Unsupported or out-of-distribution scene | `img_022` | 1 | Stylized red carton, saturated lighting, and very low resolution differ from typical training examples. |
-| Possible visible damage | `img_023` | 1 | A torn carton is detected as two carton regions. Damage is context, not a separately supported model output. |
-| No useful detection | `img_022` | 1 | Zero cartons are returned for a one-carton scene. |
-| Poor image quality | None confirmed | 0 | `img_022` is small and stylized, but the dominant issue is domain shift rather than decode corruption. |
-| Incorrect size class | Not assessed | — | The current manifest does not contain independently reviewed size-class ground truth. |
+| Image | Expected | Predicted | Error | Primary finding |
+| --- | ---: | ---: | ---: | --- |
+| `img_003.png` | 11 | 24 | +13 | Window/background false positives and crowded-scene overcount. |
+| `img_005.jpg` | 14 | 13 | -1 | One shadowed or partially obscured carton missed. |
+| `img_012.jpg` | 4 | 3 | -1 | One person-occluded carton missed. |
+| `img_013.jpg` | 7 | 8 | +1 | One carton likely represented twice. |
+| `img_016.jpg` | 1 | 2 | +1 | Background box-like region treated as a carton. |
+| `img_020.jpg` | 1 | 2 | +1 | Unsupported reflection/shadow treated as a second carton. |
+| `img_022.jpg` | 1 | 0 | -1 | Stylized open carton completely missed. |
+| `img_023.jpg` | 1 | 2 | +1 | Damaged carton fragmented into detections. |
+| `img_026.jpg` | 6 | 4 | -2 | Clutter and partial obstruction cause misses. |
+| `img_027.jpg` | 58 | 47 | -11 | Dense stack causes small, partial, and border misses. |
+| `img_028.jpg` | 10 | 5 | -5 | Occlusion and background clutter cause multiple misses. |
+| `img_030.jpg` | 1 | 5 | +4 | One physical carton severely fragmented across visible regions. |
+| `img_031.jpg` | 9 | 7 | -2 | Overlap and foreground occlusion cause misses. |
 
-## Image-Level Findings
+## Representative Sprint Examples
 
-### `img_003.png`: 12 expected, 25 predicted
+These five examples provide a concise demonstration set. Generated overlays
+remain evaluation artifacts and are not committed.
 
-Primary category: **non-carton false positives**.
+### `img_006.jpg`: dense-scene success
 
-The detector finds the physical cartons but also places carton boxes over many
-rectangular window panes. The +13 error is therefore not evidence that ordinary
-NMS failed to merge repeated boxes on the same carton. It is a texture and
-shape confusion: bright rectangular window regions resemble the rectangular
-carton examples learned by the single-class model.
+- Expected: 25
+- Predicted: 25
+- Demonstrates that a crowded scene can still produce an exact operational
+  count; scene difficulty alone does not determine failure.
 
-Operational impact: severe phantom inventory in a plausible warehouse-like
-scene. Raising the global confidence threshold is a poor first response because
-several window false positives are high confidence and the change would increase
-missed cartons elsewhere.
+### `img_010.jpg`: clear multi-carton success
 
-### `img_012.jpg`: 4 expected, 3 predicted
+- Expected: 4
+- Predicted: 4
+- Demonstrates the normal supported workflow with four distinct cartons.
+- The count is correct even though the displayed bounding-box lines could be
+  made more visible in the user interface.
 
-Primary category: **missed, partially occluded carton**.
+### `img_003.png`: severe overcount
 
-The three larger cartons are detected. The small upper carton behind the
-person's head is missed. Its visible area is sufficient to identify it under
-the counting rule, but its scale and person occlusion make it unlike the larger,
-fully visible cartons below it.
+- Expected: 11
+- Predicted: 24
+- Rectangular window/background regions and crowded geometry create phantom
+  inventory. A global confidence change is unlikely to solve this safely.
 
-Operational impact: one physical item is absent from the intake record. This is
-why the selected threshold favors recall over the slightly lower mean absolute
-error available at confidence `0.55`.
+### `img_027.jpg`: severe undercount
 
-### `img_022.jpg`: 1 expected, 0 predicted
+- Expected: 58
+- Predicted: 47
+- Small, overlapping, partial, and border cartons are missed in a very dense
+  warehouse stack. This should be presented as a high-risk review scene.
 
-Primary category: **unsupported appearance / missed carton**.
+### `img_020.jpg`: unsupported reflection scene
 
-The image is a small, stylized red open carton with saturated backlighting. The
-shape is identifiable to a human, but it differs strongly from the brown,
-photographic cartons that dominate the data. No useful detection is returned.
+- Expected: 1
+- Predicted: 2
+- A low-light reflection or shadow strongly resembles another carton. The image
+  remains in the dataset as limitation evidence and is excluded only from the
+  separately labelled supported-scene metric.
 
-Operational impact: a silent false negative unless the zero-detection review
-rule routes the scan to a person.
+## Human-Review Rules
 
-### `img_023.jpg`: 1 expected, 2 predicted
+Review rules do not change, merge, add, or remove detections. They set
+`review_required` and add a reason so an operator knows not to trust the count
+without checking the evidence image.
 
-Primary category: **fragmented detection on a damaged carton**.
+Candidate rules must be tested offline against all 31 images before deployment:
 
-The torn front face creates a strong vertical separation. The model places two
-adjacent boxes over the left and right parts of one physical carton. Their
-overlap is small, so standard IoU NMS is not designed to merge them.
+1. Keep zero detections reviewable; this covers complete misses such as
+   `img_022.jpg`.
+2. Keep high detection counts reviewable; they indicate operational risk in
+   scenes such as `img_003.png` and `img_027.jpg`, even when a crowded scene
+   happens to have an exact count.
+3. Test fragment geometry on damaged or single-carton scenes such as
+   `img_023.jpg` and `img_030.jpg`; do not automatically merge boxes.
+4. Test border-density and overlap signals for crowded undercount scenes. A flag
+   may identify risk but cannot recover cartons that the model never detected.
+5. Treat reflection, severe occlusion, and stylized appearance as documented
+   unsupported or uncertain conditions until a validated image-level signal is
+   available.
 
-Operational impact: one damaged item becomes two inventory units. A targeted
-fragmentation heuristic may help, but must not merge genuinely adjacent cartons.
+A candidate rule is useful when it catches meaningful count-risk cases with an
+acceptable review burden. Operational review flags are not accuracy fixes and
+must not be presented as corrected counts.
 
-### `img_030.jpg`: 1 recorded, 5 predicted
+## What Changed After Review
 
-Status: **confirmed fragmentation/duplicate-detection error**.
-
-Human review confirms that the image contains one distinct physical carton.
-The other visible regions are not reliably separable as additional cartons
-under the identity-based counting rule. The model returns five adjacent or
-overlapping detections across visible faces and fragments of that one carton,
-creating four false-positive inventory units.
-
-Operational impact: one carton becomes five inventory units. This is the
-strongest case for testing a conservative fragmentation review flag, while
-avoiding automatic merges that could collapse genuinely adjacent cartons.
-
-## What Changed After Reviewing the Errors
-
-1. The operating point remains confidence `0.45`, IoU `0.30`. The corrected
-   24-image sweep gives the best exact-count accuracy, while a higher confidence
-   threshold increases undercounts.
-2. Global NMS tightening is not the next default change. It cannot remove the
-   high-confidence window false positives in `img_003`, and adjacent fragments
-   in `img_023` have little overlap.
-3. Error analysis is multi-label so one image can expose several related model
-   failure modes without changing its reviewed ground truth.
-4. Human review confirms `img_030` contains one carton; its four excess counts
-   are classified as fragmented or duplicate detections.
-
-## Next Experiments
-
-Run each experiment against the complete reviewed set and reject it if exact
-count accuracy or undercount frequency worsens materially.
-
-1. Obtain independent counts for the seven reserved crowded scenes.
-2. Measure box-pair geometry on `img_023` and `img_030` to test a conservative
-   adjacent-fragment review flag before attempting automatic merging.
-3. Add a review reason for suspicious repeated rectangular detections or a
-   high predicted count in scenes like `img_003`; do not claim that this fixes
-   the underlying detector confusion.
-4. Expand future training data with labelled hard negatives such as windows and
-   with stylized, open, damaged, partial, and strongly lit cartons. This is a
-   future model-improvement recommendation, not part of the current sprint
-   implementation.
+1. Human review now covers all 31 images, including the seven formerly reserved
+   crowded scenes.
+2. Corrected counts replace the earlier incomplete 24-image metric.
+3. `img_020.jpg` remains in full-set reporting and is explicitly classified as
+   an unsupported reflection scene.
+4. The deployed thresholds remain unchanged. The new evidence does not justify
+   a global threshold adjustment because the set contains both severe
+   overcounts and severe undercounts.
+5. Automatic detection merging remains disabled.
 
 ## Limitations
 
-- This is a 24-image reviewed count set, not warehouse-scale validation.
-- Seven crowded images await a second independent count.
-- Size-class errors cannot be measured until size ground truth is reviewed.
-- Damage is not a supported detection task; it is contextual evidence for human
-  review only.
+- Thirty-one public or staged images are not warehouse-scale validation.
+- Count labels are human-reviewed, but machine-readable ground-truth bounding
+  boxes and size classes are not yet available for localization metrics.
+- The dataset contains difficult scenes selected for error analysis, so the
+  result is not a claim about all future images.
+- Damage, reflection, and image-quality classification are not independent
+  model tasks in the current prototype.
+- Before real warehouse use, the system requires representative operational
+  data, independent annotation review, monitoring, and a review-outcome
+  feedback process.
