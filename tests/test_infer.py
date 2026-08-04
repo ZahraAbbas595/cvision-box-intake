@@ -30,7 +30,7 @@ def test_version_returns_model_and_schema_versions(client: TestClient) -> None:
 
     assert response.status_code == 200
     assert response.json() == {
-        "service_version": "0.2.0",
+        "service_version": "0.8.0",
         "model_name": "carton-yolov8n",
         "model_version": "ft-v1",
         "model_backend": "pytorch",
