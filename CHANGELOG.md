@@ -48,7 +48,7 @@ No changes recorded yet.
 review-only image-quality routing, preserves curated baseline overlays, removes
 obsolete experiments, and turns the repository documentation into a complete
 developer handoff. Integrated by PRs #13 through #18 (`d6acc290`, `ebc1ff4a`,
-`28c98490`, `3f8df64a`, `b47259ca`, `3ac201d3`) and the version-alignment PR.
+`28c98490`, `3f8df64a`, `b47259ca`, `3ac201d3`) and PR #19 (`f6186a3`).
 
 ## [0.7.0] - 2026-08-04
 
