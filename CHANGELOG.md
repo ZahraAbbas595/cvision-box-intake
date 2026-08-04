@@ -9,6 +9,12 @@ available.
 
 ## [Unreleased]
 
+No changes recorded yet.
+
+## [0.8.0] - 2026-08-04
+
+### Project Handoff and Week 2 Completion
+
 ### Added
 
 - Root project README with setup, operation, evaluation, deployment, Git, and
@@ -30,11 +36,19 @@ available.
   coverage notes, and endpoint/review regression tests.
 - Expanded the root README into a complete architecture, API, configuration,
   evaluation, deployment, troubleshooting, and contribution guide.
+- Synchronized the package and API service version at `0.8.0` and documented
+  the rule that meaningful README and changelog updates move together.
 
 ### Removed
 
 - Obsolete root-level `spike_detection.py` and `spike_world.py` experiments;
   their history remains available through Git and this changelog.
+
+**Difference from 0.7.0:** completes the Week 2 reliability evidence, adds
+review-only image-quality routing, preserves curated baseline overlays, removes
+obsolete experiments, and turns the repository documentation into a complete
+developer handoff. Integrated by PRs #13 through #18 (`d6acc290`, `ebc1ff4a`,
+`28c98490`, `3f8df64a`, `b47259ca`, `3ac201d3`) and PR #19 (`f6186a3`).
 
 ## [0.7.0] - 2026-08-04
 

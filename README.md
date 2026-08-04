@@ -15,6 +15,7 @@ warehouse counting or a production deployment claim.
 | FastAPI backend | Implemented and deployed on Render Free |
 | Production inference | ONNX Runtime on CPU |
 | Development inference | Fine-tuned YOLOv8n through PyTorch |
+| Current project and service version | `0.8.0` |
 | Reviewed evaluation set | 31 images |
 | Full-set exact-count accuracy | 18/31, or 58.1% |
 | Supported-scene exact-count accuracy | 18/30, or 60.0% |
@@ -152,7 +153,7 @@ curl.exe -X POST "http://127.0.0.1:8000/v1/box-intake/infer" `
     "backend": "onnx"
   },
   "service": {
-    "version": "0.2.0"
+    "version": "0.8.0"
   },
   "runtime_memory": {
     "current_rss_mb": 169.4,
@@ -453,7 +454,9 @@ local artifacts and must remain uncommitted.
 - Keep each commit and pull request focused.
 - Require green CI before merging.
 - Merge through pull requests; never commit directly to `dev` or `main`.
-- Update `CHANGELOG.md` when behavior or a meaningful project stage changes.
+- Update `README.md` and `CHANGELOG.md` together whenever a meaningful change
+  affects behavior, setup, operation, evaluation, deployment, limitations, or
+  project status.
 
 Never commit secrets, real `.env` files, downloaded datasets, arbitrary model
 weights, exported ONNX files, response captures, generated CSVs, or broad

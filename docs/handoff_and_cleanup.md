@@ -68,7 +68,8 @@ Before each handoff or release:
 6. Confirm no secrets, datasets outside the approved evaluation set, exported
    models, response captures, or generated metrics are staged.
 7. Review root-level scripts and dependencies for obsolete experimental paths.
-8. Update `CHANGELOG.md` with the behavioral difference from the previous stage.
+8. Update `README.md` and `CHANGELOG.md` together when behavior, setup,
+   operation, evaluation, deployment, limitations, or project status changes.
 9. Merge through a pull request; never clean up directly on `dev` or `main`.
 
 ## Release Readiness
