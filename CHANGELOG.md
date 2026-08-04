@@ -28,6 +28,8 @@ available.
   historical spikes, and unresolved sprint gaps.
 - Completed the Week 2 error taxonomy, visual evidence links, review-rule
   coverage notes, and endpoint/review regression tests.
+- Expanded the root README into a complete architecture, API, configuration,
+  evaluation, deployment, troubleshooting, and contribution guide.
 
 ### Removed
 
