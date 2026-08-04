@@ -74,6 +74,9 @@ Environment variables are documented in `sample.env`. Local development uses
 the committed PyTorch model by default. Render uses ONNX Runtime with
 `MODEL_BACKEND=onnx`, confidence `0.47`, and IoU `0.25`.
 
+Optional image-quality thresholds are documented in `sample.env`. They control
+review-only resolution, blur, and exposure flags and never alter detections.
+
 ## Run the Backend
 
 ```powershell
