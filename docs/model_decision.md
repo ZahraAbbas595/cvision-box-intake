@@ -2,6 +2,11 @@
 
 ## What We Tested
 
+Five curated historical overlays are preserved in
+[`docs/examples/README.md`](examples/README.md). They show the visual evidence
+behind the baseline decision and are explicitly separate from current ONNX
+evaluation results.
+
 ### Attempt 1: YOLOv8n (COCO pretrained)
 - Model: yolov8n.pt
 - Classes: 80 COCO classes (no box, carton, or parcel class)

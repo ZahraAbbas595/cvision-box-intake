@@ -162,12 +162,24 @@ must not be presented as corrected counts.
 | `boxes_cut_off_at_edge` | More than 20% of detections touch the frame | Flags border truncation and possible missed carton extent. |
 | `high_detection_count` | At least 12 detections | Routes crowded scenes where overlap and occlusion increase count risk. |
 | `possible_fragmented_detections` | A small detection set contains adjacent, aligned fragments | Flags possible duplicate regions without merging detections. |
+| `poor_image_quality` | Resolution, blur, or exposure check fires | Routes visually weak evidence for review without changing detections. |
 
 The fragment rule is deliberately not described as a general occlusion detector.
 Crowded overlap is currently represented conservatively by high-count and edge
 signals because no validated image-level occlusion classifier exists. This
 keeps the operational decision independent of confidence without claiming a
 capability the prototype has not demonstrated.
+
+### Image-Quality Thresholds
+
+The service reports deterministic, review-only quality flags: minimum image
+dimension below `200` pixels, grayscale Laplacian variance below `50`, mean
+brightness below `40`, or mean brightness above `215`. These initial thresholds
+are intentionally conservative and environment-configurable. They do not add,
+remove, or merge detections; any flag adds `poor_image_quality` and applies the
+documented `0.15` system-confidence penalty. The current 31-image set is too
+small to claim that these thresholds generalize to warehouse cameras, so they
+must be revalidated when representative operational images become available.
 
 ## What Changed After Review
 

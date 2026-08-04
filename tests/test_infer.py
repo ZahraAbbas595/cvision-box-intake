@@ -11,7 +11,10 @@ from app.main import app
 
 @pytest.fixture
 def client() -> Iterator[TestClient]:
-    with TestClient(app) as test_client:
+    with (
+        patch("app.main.assess_image_quality", return_value=[]),
+        TestClient(app) as test_client,
+    ):
         yield test_client
 
 
@@ -147,6 +150,29 @@ def test_infer_flags_edge_truncation(client: TestClient) -> None:
 
     assert response.status_code == 200
     assert "boxes_cut_off_at_edge" in response.json()["review_reasons"]
+
+
+def test_infer_routes_poor_image_quality_to_review(client: TestClient) -> None:
+    image = np.full((100, 100, 3), 255, dtype=np.uint8)
+    encoded, buffer = cv2.imencode(".jpg", image)
+    assert encoded
+    detections = [{"bbox_xyxy": [10, 10, 50, 50], "confidence": 0.9}]
+
+    with (
+        patch("app.main.assess_image_quality", return_value=["possible_blur"]),
+        patch("app.main.run_inference", return_value=detections),
+    ):
+        response = client.post(
+            "/v1/box-intake/infer",
+            files={"file": ("boxes.jpg", buffer.tobytes(), "image/jpeg")},
+        )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["image"]["quality_flags"] == ["possible_blur"]
+    assert body["human_review_required"] is True
+    assert "poor_image_quality" in body["review_reasons"]
+    assert body["confidence_score"] == 0.75
 
 
 def test_infer_flags_possible_fragmented_detections(client: TestClient) -> None:

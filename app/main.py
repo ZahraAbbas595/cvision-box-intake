@@ -12,7 +12,10 @@ import numpy as np
 from fastapi import FastAPI, File, HTTPException, Response, UploadFile
 
 from app.config import (
+    BLUR_VARIANCE_THRESHOLD,
+    BRIGHT_MEAN_THRESHOLD,
     CONF_THRESHOLD,
+    DARK_MEAN_THRESHOLD,
     EDGE_MARGIN_PX,
     EDGE_REVIEW_RATIO,
     FRAGMENT_MAX_AREA_RATIO,
@@ -25,6 +28,7 @@ from app.config import (
     IOU_THRESHOLD,
     LOW_CONFIDENCE_THRESHOLD,
     MAX_UPLOAD_BYTES,
+    MIN_IMAGE_DIMENSION,
     MODEL_BACKEND,
     MODEL_NAME,
     MODEL_VERSION,
@@ -34,6 +38,7 @@ from app.config import (
 from app.schemas import HealthResponse, VersionResponse
 from app.services.count_risk import find_suspicious_fragment_pairs
 from app.services.detector import run_inference
+from app.services.quality import assess_image_quality
 from app.services.runtime import memory_snapshot
 
 app = FastAPI(title="CVision Box Intake API")
@@ -82,6 +87,13 @@ async def infer(response: Response, file: UploadFile = File(...)) -> dict:
             status_code=422, detail="Cannot read image file. It may be corrupted."
         )
     img_h, img_w = image.shape[:2]
+    quality_flags = assess_image_quality(
+        image,
+        min_dimension=MIN_IMAGE_DIMENSION,
+        blur_variance_threshold=BLUR_VARIANCE_THRESHOLD,
+        dark_mean_threshold=DARK_MEAN_THRESHOLD,
+        bright_mean_threshold=BRIGHT_MEAN_THRESHOLD,
+    )
     try:
         detections = run_inference(image)
     except (FileNotFoundError, RuntimeError, ValueError) as error:
@@ -130,6 +142,8 @@ async def infer(response: Response, file: UploadFile = File(...)) -> dict:
         )
 
     review_reasons = []
+    if quality_flags:
+        review_reasons.append("poor_image_quality")
     if len(detection_list) == 0:
         review_reasons.append("no_boxes_detected")
     if any(
@@ -168,6 +182,8 @@ async def infer(response: Response, file: UploadFile = File(...)) -> dict:
             )
             else 0.0
         )
+        if quality_flags:
+            penalties += 0.15
         if edge_count / len(detection_list) > EDGE_REVIEW_RATIO:
             penalties += 0.05
         confidence_score = round(max(base - penalties, 0.05), 2)
@@ -215,7 +231,11 @@ async def infer(response: Response, file: UploadFile = File(...)) -> dict:
         "event_type": "box_intake_scan",
         "request_id": request_id,
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "image": {"width": img_w, "height": img_h, "quality_flags": []},
+        "image": {
+            "width": img_w,
+            "height": img_h,
+            "quality_flags": quality_flags,
+        },
         "detections": detection_list,
         "visible_box_count": len(detection_list),
         "size_summary": size_summary,

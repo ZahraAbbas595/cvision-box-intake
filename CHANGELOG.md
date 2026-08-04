@@ -17,6 +17,10 @@ available.
 - Public-boundary docstrings for the application and supported utility scripts.
 - Module-level docstrings across supported application, evaluation, and
   operational Python modules.
+- Conservative resolution, blur, and exposure signals for review-only image
+  quality routing.
+- Five curated annotated baseline examples documenting the COCO and YOLO-World
+  model-selection evidence.
 
 ### Changed
 
