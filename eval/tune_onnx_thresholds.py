@@ -12,6 +12,7 @@ from app.services.detector import ONNX_MODEL_PATH, _nms, _prepare_input
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse ONNX model, reviewed data, and report settings."""
     parser = argparse.ArgumentParser(description="Tune ONNX count thresholds.")
     parser.add_argument(
         "--ground-truth",
@@ -35,6 +36,7 @@ def decode_candidates(
     pad_y: int,
     image: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray]:
+    """Decode raw ONNX candidates into original-image boxes and scores."""
     prediction = np.squeeze(raw_output, axis=0)
     if prediction.shape[0] < prediction.shape[1]:
         prediction = prediction.T
@@ -58,6 +60,7 @@ def decode_candidates(
 
 
 def main() -> None:
+    """Sweep confidence and IoU settings for the ONNX detector."""
     args = parse_args()
     manifest = json.loads(args.ground_truth.read_text(encoding="utf-8"))
     session = ort.InferenceSession(

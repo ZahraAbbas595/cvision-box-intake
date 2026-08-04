@@ -5,6 +5,8 @@ from typing import Sequence
 
 @dataclass(frozen=True)
 class PairGeometry:
+    """Normalized geometric relationship between two detection boxes."""
+
     gap_ratio: float
     axis_overlap: float
     area_ratio: float
@@ -21,6 +23,7 @@ def measure_pair_geometry(
     image_width: int,
     image_height: int,
 ) -> PairGeometry:
+    """Measure normalized gap, overlap, size, and IoU for two boxes."""
     first_width = max(first[2] - first[0], 1)
     first_height = max(first[3] - first[1], 1)
     second_width = max(second[2] - second[0], 1)
@@ -56,6 +59,7 @@ def find_suspicious_fragment_pairs(
     max_area_ratio: float,
     max_iou: float,
 ) -> list[tuple[int, int]]:
+    """Return box-index pairs whose geometry suggests fragmentation risk."""
     suspicious_pairs: list[tuple[int, int]] = []
     for (first_index, first), (second_index, second) in combinations(
         enumerate(boxes), 2

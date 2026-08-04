@@ -11,11 +11,11 @@ from pathlib import Path
 
 from ultralytics import YOLO
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse model, reviewed data, thresholds, and output settings."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--model",
@@ -44,12 +44,14 @@ def parse_args() -> argparse.Namespace:
 
 
 def percentile(values: list[float], fraction: float) -> float:
+    """Return a nearest-rank percentile from a non-empty value list."""
     ordered = sorted(values)
     index = min(round((len(ordered) - 1) * fraction), len(ordered) - 1)
     return ordered[index]
 
 
 def main() -> None:
+    """Evaluate operational carton counts against the reviewed manifest."""
     args = parse_args()
     ground_truth = json.loads(args.ground_truth.read_text(encoding="utf-8"))
     model = YOLO(args.model)

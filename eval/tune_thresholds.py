@@ -12,11 +12,11 @@ import torch
 from torchvision.ops import nms
 from ultralytics import YOLO
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse PyTorch model, reviewed data, and report settings."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--model",
@@ -44,6 +44,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Sweep confidence and IoU settings for the PyTorch detector."""
     args = parse_args()
     ground_truth = json.loads(args.ground_truth.read_text(encoding="utf-8"))
     filenames = list(ground_truth["images"])

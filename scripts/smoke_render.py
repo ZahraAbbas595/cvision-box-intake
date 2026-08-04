@@ -9,6 +9,7 @@ FREE_RENDER_MEMORY_MB = 512.0
 
 
 def parse_args() -> argparse.Namespace:
+    """Parse the deployment URL, smoke image, timeout, and memory gate."""
     parser = argparse.ArgumentParser(description="Smoke-test a deployed API.")
     parser.add_argument("base_url")
     parser.add_argument("image", type=Path)
@@ -22,6 +23,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Verify deployed health, backend identity, inference, and peak RSS."""
     args = parse_args()
     base_url = args.base_url.rstrip("/")
     with httpx.Client(timeout=args.timeout) as client:

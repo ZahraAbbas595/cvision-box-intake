@@ -17,10 +17,16 @@ MODEL_STRIDE = 32
 
 
 class Detector(Protocol):
-    def predict(self, image_array: np.ndarray) -> list[dict[str, object]]: ...
+    """Backend-independent carton detector contract."""
+
+    def predict(self, image_array: np.ndarray) -> list[dict[str, object]]:
+        """Return accepted carton detections for a decoded BGR image."""
+        ...
 
 
 class PyTorchDetector:
+    """Ultralytics/PyTorch detector used for local development."""
+
     def __init__(self) -> None:
         import torch
         from ultralytics import YOLO
@@ -30,6 +36,7 @@ class PyTorchDetector:
         self._model.to("cpu")
 
     def predict(self, image_array: np.ndarray) -> list[dict[str, object]]:
+        """Run Ultralytics inference and normalize its detection response."""
         results = self._model(
             image_array,
             conf=CONF_THRESHOLD,
@@ -53,6 +60,8 @@ class PyTorchDetector:
 
 
 class OnnxDetector:
+    """Lightweight ONNX Runtime detector used by production."""
+
     def __init__(self) -> None:
         import onnxruntime as ort
 
@@ -72,6 +81,7 @@ class OnnxDetector:
         self._input_name = self._session.get_inputs()[0].name
 
     def predict(self, image_array: np.ndarray) -> list[dict[str, object]]:
+        """Run ONNX inference with production preprocessing and NMS."""
         tensor, scale, pad_x, pad_y = _prepare_input(image_array)
         raw_output = self._session.run(None, {self._input_name: tensor})[0]
         boxes, scores = _decode_output(raw_output, scale, pad_x, pad_y, image_array)
@@ -177,6 +187,7 @@ _detector: Detector | None = None
 
 
 def get_detector() -> Detector:
+    """Lazily construct and cache the configured inference backend."""
     global _detector
     if _detector is None:
         if MODEL_BACKEND == "pytorch":
@@ -189,4 +200,5 @@ def get_detector() -> Detector:
 
 
 def run_inference(image_array: np.ndarray) -> list[dict[str, object]]:
+    """Run the configured detector for a decoded BGR image."""
     return get_detector().predict(image_array)

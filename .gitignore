@@ -10,6 +10,7 @@ models/*.onnx
 eval/results/
 runs/
 /dataset/
+response*.json
 .DS_Store
 .venv/
 venv/
