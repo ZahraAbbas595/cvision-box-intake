@@ -42,15 +42,12 @@ The current workstation also contains protected untracked response captures and
 an untracked memory test. They are intentionally left untouched until their
 owner explicitly decides their disposition.
 
-## Historical Cleanup Candidates
+## Historical Cleanup
 
-`spike_detection.py` and `spike_world.py` are tracked exploratory scripts from
-the pretrained/YOLO-World stage. They are not part of the supported inference
-or evaluation path and download external weights implicitly.
-
-They should be removed or moved to an explicit `archive/` area in a separate PR
-only after confirming that the changelog and Git history provide sufficient
-historical evidence. This handoff update does not delete them.
+The obsolete `spike_detection.py` and `spike_world.py` exploratory scripts were
+removed after confirming they were not referenced by the supported inference or
+evaluation workflow. Their implementation and purpose remain recoverable from
+Git history and `CHANGELOG.md`.
 
 ## Known Repository Gap
 

@@ -21,6 +21,11 @@ available.
 - Clarified which files are supported workflow components, generated artifacts,
   historical spikes, and unresolved sprint gaps.
 
+### Removed
+
+- Obsolete root-level `spike_detection.py` and `spike_world.py` experiments;
+  their history remains available through Git and this changelog.
+
 ## [0.7.0] - 2026-08-04
 
 ### Complete Human-Reviewed Evaluation
