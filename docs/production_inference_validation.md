@@ -1,5 +1,10 @@
 # Production Inference Validation
 
+> **Historical operating-point evidence:** the 24-image accuracy figures in
+> this document record the threshold/export decision made before all crowded
+> scenes were reviewed. The current complete 31-image count result is documented
+> in `docs/error_analysis.md` and supersedes these figures for sprint reporting.
+
 **Date:** August 3, 2026
 
 ## Constraint
