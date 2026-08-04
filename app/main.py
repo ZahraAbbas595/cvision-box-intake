@@ -1,3 +1,5 @@
+"""FastAPI application and carton-inference HTTP endpoints."""
+
 import base64
 import json
 import logging

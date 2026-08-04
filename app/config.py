@@ -1,3 +1,5 @@
+"""Central configuration values loaded from environment variables."""
+
 import os
 
 CONF_THRESHOLD = float(os.getenv("CONF_THRESHOLD", "0.45"))

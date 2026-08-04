@@ -1,3 +1,5 @@
+"""Export the selected PyTorch carton detector to dynamic-shape ONNX."""
+
 from pathlib import Path
 
 from ultralytics import YOLO

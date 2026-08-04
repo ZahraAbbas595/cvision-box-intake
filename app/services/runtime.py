@@ -1,3 +1,5 @@
+"""Lightweight process-runtime telemetry helpers."""
+
 from pathlib import Path
 
 

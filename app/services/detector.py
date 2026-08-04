@@ -1,3 +1,5 @@
+"""PyTorch and ONNX carton-detection backends and post-processing."""
+
 from pathlib import Path
 from typing import Protocol
 

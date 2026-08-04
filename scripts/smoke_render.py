@@ -1,3 +1,5 @@
+"""Smoke-test the deployed API response contract and memory headroom."""
+
 import argparse
 import json
 import time
