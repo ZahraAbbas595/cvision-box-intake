@@ -55,6 +55,27 @@ def test_infer_rejects_corrupted_image(client: TestClient) -> None:
     assert response.json()["detail"] == ("Cannot read image file. It may be corrupted.")
 
 
+def test_infer_rejects_empty_upload(client: TestClient) -> None:
+    response = client.post(
+        "/v1/box-intake/infer",
+        files={"file": ("boxes.jpg", b"", "image/jpeg")},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Empty file uploaded."
+
+
+def test_infer_rejects_oversized_upload(client: TestClient) -> None:
+    with patch("app.main.MAX_UPLOAD_BYTES", 4):
+        response = client.post(
+            "/v1/box-intake/infer",
+            files={"file": ("boxes.jpg", b"12345", "image/jpeg")},
+        )
+
+    assert response.status_code == 413
+    assert response.json()["detail"] == "Image too large. Maximum size is 10MB."
+
+
 def test_infer_returns_structured_count(client: TestClient) -> None:
     image = np.full((100, 100, 3), 255, dtype=np.uint8)
     encoded, buffer = cv2.imencode(".jpg", image)
@@ -75,6 +96,57 @@ def test_infer_returns_structured_count(client: TestClient) -> None:
     assert body["human_review_required"] is False
     assert body["model"]["backend"] == "pytorch"
     assert response.headers["x-request-id"] == body["request_id"]
+
+
+def test_infer_routes_zero_detections_to_review(client: TestClient) -> None:
+    image = np.full((100, 100, 3), 255, dtype=np.uint8)
+    encoded, buffer = cv2.imencode(".jpg", image)
+    assert encoded
+
+    with patch("app.main.run_inference", return_value=[]):
+        response = client.post(
+            "/v1/box-intake/infer",
+            files={"file": ("boxes.jpg", buffer.tobytes(), "image/jpeg")},
+        )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["visible_box_count"] == 0
+    assert body["confidence_score"] == 0.0
+    assert body["human_review_required"] is True
+    assert "no_boxes_detected" in body["review_reasons"]
+
+
+def test_infer_flags_low_confidence_detection(client: TestClient) -> None:
+    image = np.full((100, 100, 3), 255, dtype=np.uint8)
+    encoded, buffer = cv2.imencode(".jpg", image)
+    assert encoded
+    detections = [{"bbox_xyxy": [10, 10, 50, 50], "confidence": 0.4}]
+
+    with patch("app.main.run_inference", return_value=detections):
+        response = client.post(
+            "/v1/box-intake/infer",
+            files={"file": ("boxes.jpg", buffer.tobytes(), "image/jpeg")},
+        )
+
+    assert response.status_code == 200
+    assert "low_confidence_detection" in response.json()["review_reasons"]
+
+
+def test_infer_flags_edge_truncation(client: TestClient) -> None:
+    image = np.full((100, 100, 3), 255, dtype=np.uint8)
+    encoded, buffer = cv2.imencode(".jpg", image)
+    assert encoded
+    detections = [{"bbox_xyxy": [0, 10, 50, 50], "confidence": 0.9}]
+
+    with patch("app.main.run_inference", return_value=detections):
+        response = client.post(
+            "/v1/box-intake/infer",
+            files={"file": ("boxes.jpg", buffer.tobytes(), "image/jpeg")},
+        )
+
+    assert response.status_code == 200
+    assert "boxes_cut_off_at_edge" in response.json()["review_reasons"]
 
 
 def test_infer_flags_possible_fragmented_detections(client: TestClient) -> None:
