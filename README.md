@@ -20,7 +20,7 @@ warehouse counting or a production deployment claim.
 | Full-set exact-count accuracy | 18/31, or 58.1% |
 | Supported-scene exact-count accuracy | 18/30, or 60.0% |
 | Human-review routing | Implemented; never changes counts automatically |
-| Streamlit frontend | Implemented; Community Cloud deployment pending |
+| Streamlit frontend | Deployed on Streamlit Community Cloud |
 | Production readiness | Research prototype only |
 
 ### Live Backend
@@ -29,6 +29,14 @@ warehouse counting or a production deployment claim.
 - Health: <https://cvision-box-intake-api.onrender.com/health>
 - Version: <https://cvision-box-intake-api.onrender.com/version>
 - Interactive OpenAPI docs: <https://cvision-box-intake-api.onrender.com/docs>
+
+### Live Frontend
+
+- Streamlit prototype: <https://cvision-box-intake.streamlit.app/>
+
+The frontend deploys from `dev` and reads the Render URL from an encrypted
+Streamlit secret. See `docs/deployment_acceptance.md` for live clear-scene and
+difficult-scene smoke evidence.
 
 Render uses the Free plan and must remain below its 512 MB memory limit. The
 service can cold-start after inactivity.
@@ -441,7 +449,8 @@ local artifacts and must remain uncommitted.
   inflates conventional validation metrics.
 - The API has no authentication, secure evidence store, retention policy,
   monitoring service, WMS/POD integration, or review-feedback pipeline.
-- Public Streamlit deployment and live acceptance testing remain.
+- Manual iframe upload, cold-start, timeout, and backend-outage acceptance
+  checks remain before the final release.
 
 ## Documentation Map
 
