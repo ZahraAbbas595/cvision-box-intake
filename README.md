@@ -20,7 +20,7 @@ warehouse counting or a production deployment claim.
 | Full-set exact-count accuracy | 18/31, or 58.1% |
 | Supported-scene exact-count accuracy | 18/30, or 60.0% |
 | Human-review routing | Implemented; never changes counts automatically |
-| Streamlit frontend | Not yet implemented in this repository |
+| Streamlit frontend | Implemented; Community Cloud deployment pending |
 | Production readiness | Research prototype only |
 
 ### Live Backend
@@ -52,7 +52,8 @@ integration.
 
 ```mermaid
 flowchart LR
-    U["Client or future Streamlit UI"] -->|"JPEG/PNG multipart upload"| A["FastAPI service"]
+    U["Browser"] --> S["Streamlit UI"]
+    S -->|"JPEG/PNG multipart upload over HTTPS"| A["FastAPI service"]
     A --> V["Upload validation"]
     V --> Q["Image-quality checks"]
     Q --> D["YOLOv8n detector"]
@@ -211,6 +212,8 @@ different distance.
 | `render.yaml` | Render Free backend blueprint |
 | `requirements.txt` | Development, training, and ONNX-export dependencies |
 | `requirements-render.txt` | Lightweight production runtime dependencies |
+| `requirements-ui.txt` | Streamlit frontend dependencies |
+| `ui/` | Thin frontend, typed API client, and review explanations |
 
 ## Local Development
 
@@ -248,6 +251,14 @@ Then open:
 - API docs: <http://127.0.0.1:8000/docs>
 - Health: <http://127.0.0.1:8000/health>
 - Version: <http://127.0.0.1:8000/version>
+
+Run the frontend in a second terminal:
+
+```powershell
+python -m pip install -r requirements-ui.txt
+$env:BACKEND_URL = "http://127.0.0.1:8000"
+streamlit run ui/streamlit_app.py
+```
 
 Local development defaults to the committed PyTorch model. To exercise ONNX
 locally, export the model first and set `MODEL_BACKEND=onnx`.
@@ -430,7 +441,7 @@ local artifacts and must remain uncommitted.
   inflates conventional validation metrics.
 - The API has no authentication, secure evidence store, retention policy,
   monitoring service, WMS/POD integration, or review-feedback pipeline.
-- A Streamlit frontend is still required for the complete sprint interface.
+- Public Streamlit deployment and live acceptance testing remain.
 
 ## Documentation Map
 
