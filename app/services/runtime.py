@@ -7,9 +7,19 @@ def _read_proc_memory_mb(field: str) -> float | None:
     status_path = Path("/proc/self/status")
     if not status_path.exists():
         return None
-    for line in status_path.read_text(encoding="utf-8").splitlines():
+    try:
+        lines = status_path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return None
+    for line in lines:
         if line.startswith(f"{field}:"):
-            value_kb = int(line.split()[1])
+            parts = line.split()
+            if len(parts) < 2:
+                return None
+            try:
+                value_kb = int(parts[1])
+            except ValueError:
+                return None
             return round(value_kb / 1024, 1)
     return None
 

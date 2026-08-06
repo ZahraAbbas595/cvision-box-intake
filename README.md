@@ -280,11 +280,11 @@ Run the same supported checks as CI:
 ```powershell
 python -m ruff check app tests
 python -m ruff format --check app tests
-python -m mypy app/config.py app/schemas.py
+python -m mypy app/config.py app/schemas.py app/services/count_risk.py app/services/quality.py app/services/runtime.py
 python -m pytest -q
 ```
 
-CI runs on pull requests and pushes to `dev` or `main` using Python 3.11.
+CI runs on pull requests and pushes to `dev`, `stage`, or `main` using Python 3.11.
 
 ## Evaluation
 

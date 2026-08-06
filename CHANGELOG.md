@@ -9,7 +9,18 @@ available.
 
 ## [Unreleased]
 
-No changes recorded yet.
+### Added
+
+- Targeted tests for high-count review routing and optional process-memory
+  telemetry, including malformed and unreadable Linux status data.
+- A pull request template covering rationale, risk, contracts, documentation,
+  automated checks, and smoke testing.
+
+### Changed
+
+- Made optional Linux memory telemetry fail safely when `/proc/self/status`
+  cannot be read or contains malformed values.
+- Extended CI to run on `stage` and type-check the stable pure-service modules.
 
 ## [0.8.0] - 2026-08-04
 

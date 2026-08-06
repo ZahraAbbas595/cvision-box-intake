@@ -152,6 +152,30 @@ def test_infer_flags_edge_truncation(client: TestClient) -> None:
     assert "boxes_cut_off_at_edge" in response.json()["review_reasons"]
 
 
+def test_infer_flags_high_detection_count(client: TestClient) -> None:
+    image = np.full((200, 200, 3), 255, dtype=np.uint8)
+    encoded, buffer = cv2.imencode(".jpg", image)
+    assert encoded
+    detections = [
+        {
+            "bbox_xyxy": [10 + index * 2, 10, 20 + index * 2, 20],
+            "confidence": 0.9,
+        }
+        for index in range(12)
+    ]
+
+    with patch("app.main.run_inference", return_value=detections):
+        response = client.post(
+            "/v1/box-intake/infer",
+            files={"file": ("boxes.jpg", buffer.tobytes(), "image/jpeg")},
+        )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["visible_box_count"] == 12
+    assert "high_detection_count" in body["review_reasons"]
+
+
 def test_infer_routes_poor_image_quality_to_review(client: TestClient) -> None:
     image = np.full((100, 100, 3), 255, dtype=np.uint8)
     encoded, buffer = cv2.imencode(".jpg", image)
