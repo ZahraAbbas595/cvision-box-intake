@@ -20,7 +20,7 @@ def configured_backend_url() -> str:
     return str(secret_url or os.getenv("BACKEND_URL", "")).strip()
 
 
-def render_result(result: dict[str, Any]) -> None:
+def render_result(result: dict[str, Any], original_bytes: bytes) -> None:
     """Render evidence and review guidance from a validated API result."""
     count_col, confidence_col, review_col = st.columns(3)
     count_col.metric("Visible boxes", int(result["visible_box_count"]))
@@ -37,8 +37,14 @@ def render_result(result: dict[str, Any]) -> None:
         st.success("No automatic review signals were triggered.")
 
     annotated_bytes = base64.b64decode(result["annotated_image_png_b64"], validate=True)
-    st.subheader("Annotated evidence")
-    st.image(annotated_bytes, use_container_width=True)
+    st.subheader("Visual comparison")
+    original_col, annotated_col = st.columns(2, gap="medium")
+    with original_col:
+        st.caption("Original")
+        st.image(original_bytes, use_container_width=True)
+    with annotated_col:
+        st.caption("Annotated evidence")
+        st.image(annotated_bytes, use_container_width=True)
 
     summary = result["size_summary"]
     st.subheader("Image-relative size summary")
@@ -86,8 +92,8 @@ def main() -> None:
         st.error(validation_error)
         return
 
-    st.subheader("Original image")
-    st.image(image_bytes, use_container_width=True)
+    st.subheader("Original image preview")
+    st.image(image_bytes, width=420)
     if not st.button("Analyze image", type="primary"):
         return
 
@@ -96,7 +102,7 @@ def main() -> None:
             result = analyze_image(
                 backend_url, uploaded.name, content_type, image_bytes
             )
-        render_result(result)
+        render_result(result, image_bytes)
     except BackendError as error:
         st.error(str(error))
         st.info("Use the Analyze image button to retry.")
