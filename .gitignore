@@ -13,5 +13,6 @@ runs/
 response*.json
 .DS_Store
 .venv/
+.verify-venv/
 venv/
 *.egg-info/
