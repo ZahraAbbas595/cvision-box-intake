@@ -12,6 +12,7 @@ dev = [
     "httpx",
     "mypy",
     "pytest",
+    "requests",
     "ruff",
 ]
 

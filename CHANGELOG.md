@@ -11,6 +11,10 @@ available.
 
 ### Added
 
+- A Streamlit intake interface with original and annotated image views, count,
+  size summary, confidence, plain-language review guidance, and JSON download.
+- Frontend upload validation and safe cold-start, timeout, unavailable-service,
+  API-error, and malformed-response handling.
 - Targeted tests for high-count review routing and optional process-memory
   telemetry, including malformed and unreadable Linux status data.
 - A pull request template covering rationale, risk, contracts, documentation,
