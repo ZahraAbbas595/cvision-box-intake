@@ -24,6 +24,8 @@ available.
 
 ### Changed
 
+- Constrained the pre-analysis image preview and placed original and annotated
+  evidence side by side on wider screens for easier comparison.
 - Made optional Linux memory telemetry fail safely when `/proc/self/status`
   cannot be read or contains malformed values.
 - Extended CI to run on `stage` and type-check the stable pure-service modules.
