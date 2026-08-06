@@ -8,9 +8,8 @@ import os
 from typing import Any
 
 import streamlit as st
-
-from ui.client import BackendError, analyze_image, validate_upload
-from ui.presentation import explain_review_reasons
+from client import BackendError, analyze_image, validate_upload
+from presentation import explain_review_reasons
 
 st.set_page_config(page_title="CVision Box Intake", page_icon="📦", layout="wide")
 
