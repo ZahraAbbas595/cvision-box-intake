@@ -38,6 +38,11 @@ The frontend deploys from `dev` and reads the Render URL from an encrypted
 Streamlit secret. See `docs/deployment_acceptance.md` for live clear-scene and
 difficult-scene smoke evidence.
 
+Operators can either select a JPEG/PNG file or capture a new photo using the
+device camera. When the backend flags blur, poor exposure, or low resolution,
+the UI identifies the issue and asks the operator to retake or re-upload before
+trusting the result.
+
 Render uses the Free plan and must remain below its 512 MB memory limit. The
 service can cold-start after inactivity.
 
