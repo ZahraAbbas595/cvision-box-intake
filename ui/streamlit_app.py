@@ -9,7 +9,14 @@ from typing import Any
 
 import streamlit as st
 from client import BackendError, analyze_image, validate_upload
-from presentation import explain_quality_flags, explain_review_reasons
+from presentation import explain_review_reasons
+
+QUALITY_FLAG_MESSAGES = {
+    "low_resolution": "the image resolution is too low",
+    "possible_blur": "the image may be blurry",
+    "underexposed": "the image is too dark",
+    "overexposed": "the image is too bright",
+}
 
 st.set_page_config(page_title="CVision Box Intake", page_icon="📦", layout="wide")
 
@@ -29,7 +36,10 @@ def render_result(result: dict[str, Any], original_bytes: bytes) -> None:
         else []
     )
     if quality_flags:
-        quality_details = "; ".join(explain_quality_flags(quality_flags))
+        quality_details = "; ".join(
+            QUALITY_FLAG_MESSAGES.get(flag, "the image has an unknown quality issue")
+            for flag in quality_flags
+        )
         st.error(
             "Image quality is not good enough for a reliable result: "
             f"{quality_details}. Please retake the photo or upload a clearer image, "
