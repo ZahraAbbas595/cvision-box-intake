@@ -24,6 +24,8 @@ available.
 
 ### Changed
 
+- Added on-the-spot camera capture and specific retake/re-upload guidance for
+  blurry, dark, bright, or low-resolution images in the Streamlit interface.
 - Constrained the pre-analysis image preview and placed original and annotated
   evidence side by side on wider screens for easier comparison.
 - Made optional Linux memory telemetry fail safely when `/proc/self/status`

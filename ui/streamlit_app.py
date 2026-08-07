@@ -9,7 +9,7 @@ from typing import Any
 
 import streamlit as st
 from client import BackendError, analyze_image, validate_upload
-from presentation import explain_review_reasons
+from presentation import explain_quality_flags, explain_review_reasons
 
 st.set_page_config(page_title="CVision Box Intake", page_icon="📦", layout="wide")
 
@@ -22,6 +22,20 @@ def configured_backend_url() -> str:
 
 def render_result(result: dict[str, Any], original_bytes: bytes) -> None:
     """Render evidence and review guidance from a validated API result."""
+    image_metadata = result.get("image", {})
+    quality_flags = (
+        [str(flag) for flag in image_metadata.get("quality_flags", [])]
+        if isinstance(image_metadata, dict)
+        else []
+    )
+    if quality_flags:
+        quality_details = "; ".join(explain_quality_flags(quality_flags))
+        st.error(
+            "Image quality is not good enough for a reliable result: "
+            f"{quality_details}. Please retake the photo or upload a clearer image, "
+            "then analyze it again."
+        )
+
     count_col, confidence_col, review_col = st.columns(3)
     count_col.metric("Visible boxes", int(result["visible_box_count"]))
     confidence_col.metric("Operational confidence", f"{result['confidence_score']:.0%}")
@@ -80,9 +94,22 @@ def main() -> None:
         st.error("The analysis service is not configured. Set BACKEND_URL and restart.")
         st.stop()
 
-    uploaded = st.file_uploader("Upload a carton image", type=["jpg", "jpeg", "png"])
+    source = st.radio(
+        "Choose an image source",
+        ("Upload a file", "Take a photo"),
+        horizontal=True,
+    )
+    if source == "Take a photo":
+        uploaded = st.camera_input("Take a carton photo")
+    else:
+        uploaded = st.file_uploader(
+            "Upload a carton image", type=["jpg", "jpeg", "png"]
+        )
     if uploaded is None:
-        st.info("Choose a JPEG or PNG image up to 10 MB to begin.")
+        if source == "Take a photo":
+            st.info("Take a clear, well-lit photo of the cartons to begin.")
+        else:
+            st.info("Choose a JPEG or PNG image up to 10 MB to begin.")
         return
 
     image_bytes = uploaded.getvalue()

@@ -23,6 +23,13 @@ REVIEW_REASON_MESSAGES = {
     ),
 }
 
+QUALITY_FLAG_MESSAGES = {
+    "low_resolution": "the image resolution is too low",
+    "possible_blur": "the image may be blurry",
+    "underexposed": "the image is too dark",
+    "overexposed": "the image is too bright",
+}
+
 
 def explain_review_reasons(reason_codes: list[str]) -> list[str]:
     """Map stable API reason codes to concise, plain-language explanations."""
@@ -31,4 +38,12 @@ def explain_review_reasons(reason_codes: list[str]) -> list[str]:
             code, "The result contains an unfamiliar review signal."
         )
         for code in reason_codes
+    ]
+
+
+def explain_quality_flags(flag_codes: list[str]) -> list[str]:
+    """Translate image-quality codes into specific operator guidance."""
+    return [
+        QUALITY_FLAG_MESSAGES.get(code, "the image has an unknown quality issue")
+        for code in flag_codes
     ]
