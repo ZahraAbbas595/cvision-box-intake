@@ -12,10 +12,18 @@ from streamlit.errors import StreamlitSecretNotFoundError
 
 try:
     from ui.client import BackendError, analyze_image, validate_upload
-    from ui.presentation import explain_review_reasons, review_display_state
+    from ui.presentation import (
+        explain_review_reasons,
+        preferred_backend_url,
+        review_display_state,
+    )
 except ModuleNotFoundError:  # Streamlit Cloud can execute this file as a script.
     from client import BackendError, analyze_image, validate_upload
-    from presentation import explain_review_reasons, review_display_state
+    from presentation import (
+        explain_review_reasons,
+        preferred_backend_url,
+        review_display_state,
+    )
 
 QUALITY_FLAG_MESSAGES = {
     "low_resolution": "the image resolution is too low",
@@ -31,9 +39,9 @@ def configured_backend_url() -> str:
     """Read the backend URL from Streamlit secrets or the process environment."""
     environment_url = os.getenv("BACKEND_URL", "").strip()
     if environment_url:
-        return environment_url
+        return preferred_backend_url(environment_url)
     try:
-        return str(st.secrets.get("BACKEND_URL", "")).strip()
+        return preferred_backend_url("", str(st.secrets.get("BACKEND_URL", "")))
     except StreamlitSecretNotFoundError:
         return ""
 

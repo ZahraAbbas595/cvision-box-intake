@@ -51,6 +51,11 @@ QUALITY_FLAG_MESSAGES = {
 }
 
 
+def preferred_backend_url(environment_url: str, secret_url: str = "") -> str:
+    """Prefer an explicit process URL over an optional Streamlit secret."""
+    return environment_url.strip() or secret_url.strip()
+
+
 def explain_review_reasons(reason_codes: list[str]) -> list[str]:
     """Map stable API reason codes to concise, plain-language explanations."""
     return [

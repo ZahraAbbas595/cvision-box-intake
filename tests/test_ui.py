@@ -13,6 +13,7 @@ from ui.client import (
 from ui.presentation import (
     explain_quality_flags,
     explain_review_reasons,
+    preferred_backend_url,
     review_display_state,
 )
 
@@ -23,11 +24,10 @@ def test_normalize_backend_url_removes_trailing_slash() -> None:
     )
 
 
-def test_streamlit_configuration_prefers_environment_without_secrets() -> None:
-    with patch.dict("os.environ", {"BACKEND_URL": "http://127.0.0.1:8000"}):
-        from ui.streamlit_app import configured_backend_url
-
-        assert configured_backend_url() == "http://127.0.0.1:8000"
+def test_backend_configuration_prefers_environment_over_secret() -> None:
+    assert preferred_backend_url(
+        "http://127.0.0.1:8000", "https://secret.example.com"
+    ) == ("http://127.0.0.1:8000")
 
 
 def test_normalize_backend_url_rejects_non_http_value() -> None:
