@@ -2,6 +2,12 @@
 
 import os
 
+
+def _env_flag(name: str, default: bool = False) -> bool:
+    """Parse an opt-in boolean environment setting."""
+    return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+
+
 CONF_THRESHOLD = float(os.getenv("CONF_THRESHOLD", "0.45"))
 IOU_THRESHOLD = float(os.getenv("IOU_THRESHOLD", "0.30"))
 MODEL_BACKEND = os.getenv("MODEL_BACKEND", "pytorch").lower()
@@ -21,6 +27,11 @@ FRAGMENT_MAX_AREA_RATIO = float(os.getenv("FRAGMENT_MAX_AREA_RATIO", "4.0"))
 FRAGMENT_MAX_IOU = float(os.getenv("FRAGMENT_MAX_IOU", "0.02"))
 FRAGMENT_MAX_DETECTIONS = int(os.getenv("FRAGMENT_MAX_DETECTIONS", "2"))
 FRAGMENT_MIN_PAIRS = int(os.getenv("FRAGMENT_MIN_PAIRS", "1"))
+VISUAL_REVIEW_ENABLED = _env_flag("VISUAL_REVIEW_ENABLED")
+VISUAL_REVIEW_MODEL = os.getenv("VISUAL_REVIEW_MODEL", "gemini-3.1-flash-lite")
+VISUAL_REVIEW_TIMEOUT_SECONDS = float(
+    os.getenv("VISUAL_REVIEW_TIMEOUT_SECONDS", "12.0")
+)
 SERVICE_VERSION = "0.8.0"
 MODEL_NAME = "carton-yolov8n"
 MODEL_VERSION = "ft-v1"

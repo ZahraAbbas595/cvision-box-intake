@@ -8,8 +8,14 @@ import os
 from typing import Any
 
 import streamlit as st
-from client import BackendError, analyze_image, validate_upload
-from presentation import explain_review_reasons
+from streamlit.errors import StreamlitSecretNotFoundError
+
+try:
+    from ui.client import BackendError, analyze_image, validate_upload
+    from ui.presentation import explain_review_reasons, review_display_state
+except ModuleNotFoundError:  # Streamlit Cloud can execute this file as a script.
+    from client import BackendError, analyze_image, validate_upload
+    from presentation import explain_review_reasons, review_display_state
 
 QUALITY_FLAG_MESSAGES = {
     "low_resolution": "the image resolution is too low",
@@ -23,8 +29,13 @@ st.set_page_config(page_title="CVision Box Intake", page_icon="📦", layout="wi
 
 def configured_backend_url() -> str:
     """Read the backend URL from Streamlit secrets or the process environment."""
-    secret_url = st.secrets.get("BACKEND_URL", "")
-    return str(secret_url or os.getenv("BACKEND_URL", "")).strip()
+    environment_url = os.getenv("BACKEND_URL", "").strip()
+    if environment_url:
+        return environment_url
+    try:
+        return str(st.secrets.get("BACKEND_URL", "")).strip()
+    except StreamlitSecretNotFoundError:
+        return ""
 
 
 def render_result(result: dict[str, Any], original_bytes: bytes) -> None:
@@ -53,10 +64,30 @@ def render_result(result: dict[str, Any], original_bytes: bytes) -> None:
     review_col.metric("Human review", "Required" if review_required else "Not required")
 
     if review_required:
-        st.warning("Please review this result before using the visible count.")
         codes = [str(code) for code in result["review_reasons"]]
-        for explanation in explain_review_reasons(codes):
-            st.markdown(f"- {explanation}")
+        assessment = result.get("review_assessment")
+        visual_review_required, displayed_codes = review_display_state(
+            codes, quality_flags, assessment
+        )
+
+        if visual_review_required:
+            summary = assessment.get("summary")
+            if isinstance(summary, str) and summary:
+                st.markdown(f"**Why review is needed:** {summary}")
+            guidance = assessment.get("operator_guidance")
+            if isinstance(guidance, str) and guidance:
+                st.info(f"**Suggested check:** {guidance}")
+            if displayed_codes or assessment.get("novel_reason"):
+                with st.expander("Technical review signals"):
+                    for explanation in explain_review_reasons(displayed_codes):
+                        st.markdown(f"- {explanation}")
+                    novel_reason = assessment.get("novel_reason")
+                    if isinstance(novel_reason, str) and novel_reason:
+                        st.markdown(f"- Additional observation: {novel_reason}")
+        elif displayed_codes:
+            st.markdown("**Why review is needed:**")
+            for explanation in explain_review_reasons(displayed_codes):
+                st.markdown(f"- {explanation}")
     else:
         st.success("No automatic review signals were triggered.")
 

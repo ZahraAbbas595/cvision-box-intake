@@ -293,6 +293,25 @@ locally, export the model first and set `MODEL_BACKEND=onnx`.
 | `BLUR_VARIANCE_THRESHOLD` | `50.0` | Minimum Laplacian variance |
 | `DARK_MEAN_THRESHOLD` | `40.0` | Underexposure threshold |
 | `BRIGHT_MEAN_THRESHOLD` | `215.0` | Overexposure threshold |
+| `VISUAL_REVIEW_ENABLED` | `false` | Enable the advisory vision reviewer |
+| `VISUAL_REVIEW_MODEL` | `gemini-3.1-flash-lite` | Gemini vision model |
+| `VISUAL_REVIEW_TIMEOUT_SECONDS` | `12.0` | Maximum optional-review API wait |
+
+When visual review is enabled, set `GEMINI_API_KEY` in the deployment secret
+store. Gemini API free-tier requests are subject to project quotas, and Google
+states that free-tier content may be used to improve its products. Do not enable
+it for sensitive warehouse images without approval for that data handling.
+The vision model can add allow-listed review reasons and operator guidance,
+but it cannot remove deterministic reasons, alter detections, or change the count.
+API errors and timeouts leave the deterministic result intact and report the
+optional assessment as `unavailable`.
+
+The stable visual reason taxonomy includes an `other_visual_risk` escape hatch.
+It is accepted only with a concrete `novel_reason`, automatically requires human
+review, and is emitted as a `novel_visual_risk_detected` structured log event with
+the request ID, model, and assessment confidence. Repeated novel observations can
+therefore be reviewed and promoted into stable reason codes without hardcoding
+every possible visual failure in advance.
 
 Fragment-geometry variables are also listed in `sample.env`. Render overrides
 the confidence and IoU settings to the validated ONNX values `0.47` and `0.25`.

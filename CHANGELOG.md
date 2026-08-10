@@ -11,6 +11,26 @@ available.
 
 ### Added
 
+- An opt-in, fail-safe vision reviewer that can add allow-listed visual-risk
+  reasons for occlusion, reflections or shadows, confusing scenes, damaged
+  cartons, and non-carton lookalikes, plus concise operator guidance. It never
+  changes detections or counts and falls back to deterministic review routing.
+- A validated `other_visual_risk` escape hatch with a required free-text
+  `novel_reason` and request-scoped structured logging for discovering and
+  monitoring previously unknown visual failure modes.
+- Gemini Flash-Lite free-tier integration for optional visual review, replacing
+  the earlier OpenAI-specific API key and Responses API request path.
+- Gemini-compatible schema constraints and safe structured provider-error logs
+  containing HTTP status, provider status, model, and message without credentials.
+- The established `responseMimeType` and `responseSchema` generation fields for
+  compatibility with the Gemini `v1beta generateContent` endpoint.
+- Application-side exact-field validation in place of the unsupported
+  `additionalProperties` provider-schema keyword.
+- Consolidated operator presentation with one visual-review explanation and one
+  suggested action, while retaining individual signals under technical details.
+- Calibrated reviewer instructions that prefer known categories, reserve
+  `other_visual_risk` for genuinely novel cases, and allow human confirmation of
+  false positives without letting the AI alter counts.
 - A Streamlit intake interface with original and annotated image views, count,
   size summary, confidence, plain-language review guidance, and JSON download.
 - Frontend upload validation and safe cold-start, timeout, unavailable-service,
@@ -23,6 +43,12 @@ available.
   automated checks, and smoke testing.
 
 ### Changed
+
+- Reconciled deterministic quality review with advisory model output in the UI:
+  quality-only cases now show the specific retake message without contradictory
+  no-risk summaries, routine-processing guidance, or duplicate technical signals.
+- Clarified reviewer handling of loose detection rectangles so overlap with part of
+  a nearby non-carton object does not incorrectly invalidate a real carton detection.
 
 - Added on-the-spot camera capture and specific retake/re-upload guidance for
   blurry, dark, bright, or low-resolution images in the Streamlit interface.
