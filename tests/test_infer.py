@@ -1,3 +1,4 @@
+import json
 from collections.abc import Iterator
 from unittest.mock import patch
 
@@ -23,6 +24,18 @@ def test_health_returns_expected_contract(client: TestClient) -> None:
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+def test_root_describes_service(client: TestClient) -> None:
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "service": "CVision Box Intake API",
+        "status": "ok",
+        "health": "/health",
+        "documentation": "/docs",
+    }
 
 
 def test_version_returns_model_and_schema_versions(client: TestClient) -> None:
@@ -218,6 +231,79 @@ def test_infer_flags_possible_fragmented_detections(client: TestClient) -> None:
     body = response.json()
     assert body["count_risk"]["suspicious_fragment_pair_count"] == 1
     assert "possible_fragmented_detections" in body["review_reasons"]
+
+
+def test_infer_adds_visual_review_reason_without_changing_count(
+    client: TestClient,
+) -> None:
+    image = np.full((100, 100, 3), 255, dtype=np.uint8)
+    encoded, buffer = cv2.imencode(".jpg", image)
+    assert encoded
+    detections = [{"bbox_xyxy": [10, 10, 50, 50], "confidence": 0.9}]
+    assessment = {
+        "status": "completed",
+        "provider": "google_gemini",
+        "model": "test-model",
+        "visual_review_required": True,
+        "visual_risk_reasons": ["reflection_or_shadow"],
+        "summary": "A shadow resembles another carton.",
+        "operator_guidance": "Check the shadowed region before accepting the count.",
+        "novel_reason": None,
+        "confidence": 0.8,
+    }
+
+    with (
+        patch("app.main.run_inference", return_value=detections),
+        patch("app.main.VISUAL_REVIEW_ENABLED", True),
+        patch("app.main.assess_visual_review", return_value=assessment),
+    ):
+        response = client.post(
+            "/v1/box-intake/infer",
+            files={"file": ("boxes.jpg", buffer.tobytes(), "image/jpeg")},
+        )
+
+    body = response.json()
+    assert response.status_code == 200
+    assert body["visible_box_count"] == 1
+    assert body["human_review_required"] is True
+    assert body["review_reasons"] == ["reflection_or_shadow"]
+    assert body["review_assessment"] == assessment
+
+
+def test_infer_routes_and_logs_novel_visual_risk(client: TestClient) -> None:
+    image = np.full((100, 100, 3), 255, dtype=np.uint8)
+    encoded, buffer = cv2.imencode(".jpg", image)
+    assert encoded
+    assessment = {
+        "status": "completed",
+        "provider": "google_gemini",
+        "model": "test-model",
+        "visual_review_required": True,
+        "visual_risk_reasons": ["other_visual_risk"],
+        "summary": "A loose strap obscures carton boundaries.",
+        "operator_guidance": "Move the strap and retake the image.",
+        "novel_reason": "A loose packing strap crosses multiple carton faces.",
+        "confidence": 0.79,
+    }
+
+    with (
+        patch("app.main.run_inference", return_value=[]),
+        patch("app.main.VISUAL_REVIEW_ENABLED", True),
+        patch("app.main.assess_visual_review", return_value=assessment),
+        patch("app.main.logger.warning") as warning,
+    ):
+        response = client.post(
+            "/v1/box-intake/infer",
+            files={"file": ("boxes.jpg", buffer.tobytes(), "image/jpeg")},
+        )
+
+    body = response.json()
+    assert body["human_review_required"] is True
+    assert body["review_reasons"] == ["no_boxes_detected", "other_visual_risk"]
+    log_payload = json.loads(warning.call_args.args[1])
+    assert log_payload["event"] == "novel_visual_risk_detected"
+    assert log_payload["request_id"] == body["request_id"]
+    assert log_payload["novel_reason"] == assessment["novel_reason"]
 
 
 def test_infer_maps_model_failure_to_service_unavailable(

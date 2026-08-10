@@ -10,13 +10,24 @@ from ui.client import (
     normalize_backend_url,
     validate_upload,
 )
-from ui.presentation import explain_quality_flags, explain_review_reasons
+from ui.presentation import (
+    explain_quality_flags,
+    explain_review_reasons,
+    preferred_backend_url,
+    review_display_state,
+)
 
 
 def test_normalize_backend_url_removes_trailing_slash() -> None:
     assert normalize_backend_url("https://api.example.com/") == (
         "https://api.example.com"
     )
+
+
+def test_backend_configuration_prefers_environment_over_secret() -> None:
+    assert preferred_backend_url(
+        "http://127.0.0.1:8000", "https://secret.example.com"
+    ) == ("http://127.0.0.1:8000")
 
 
 def test_normalize_backend_url_rejects_non_http_value() -> None:
@@ -45,6 +56,22 @@ def test_review_reasons_are_presented_in_plain_language() -> None:
     ]
 
 
+def test_visual_review_reasons_are_presented_in_plain_language() -> None:
+    messages = explain_review_reasons(
+        [
+            "reflection_or_shadow",
+            "unusual_non_carton_objects",
+            "other_visual_risk",
+        ]
+    )
+
+    assert messages == [
+        "A reflection or shadow may resemble a box or hide its visible boundary.",
+        "Other objects in the scene may be mistaken for cartons.",
+        "The visual reviewer found an additional scene-specific counting risk.",
+    ]
+
+
 def test_quality_flags_ask_for_a_better_image_in_plain_language() -> None:
     messages = explain_quality_flags(
         ["possible_blur", "underexposed", "overexposed", "low_resolution"]
@@ -56,6 +83,35 @@ def test_quality_flags_ask_for_a_better_image_in_plain_language() -> None:
         "the image is too bright",
         "the image resolution is too low",
     ]
+
+
+def test_quality_only_review_does_not_show_no_risk_model_guidance() -> None:
+    assessment = {
+        "status": "completed",
+        "visual_review_required": False,
+        "summary": "The carton has no identifiable visual risks.",
+        "operator_guidance": "Process the carton as usual.",
+    }
+
+    visual_review_required, displayed_codes = review_display_state(
+        ["poor_image_quality"], ["possible_blur"], assessment
+    )
+
+    assert visual_review_required is False
+    assert displayed_codes == []
+
+
+def test_visual_risk_remains_visible_alongside_quality_banner() -> None:
+    assessment = {"status": "completed", "visual_review_required": True}
+
+    visual_review_required, displayed_codes = review_display_state(
+        ["poor_image_quality", "reflection_or_shadow"],
+        ["underexposed"],
+        assessment,
+    )
+
+    assert visual_review_required is True
+    assert displayed_codes == ["reflection_or_shadow"]
 
 
 def test_timeout_message_is_safe_and_actionable() -> None:

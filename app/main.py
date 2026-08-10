@@ -1,5 +1,6 @@
 """FastAPI application and carton-inference HTTP endpoints."""
 
+import asyncio
 import base64
 import json
 import logging
@@ -34,15 +35,30 @@ from app.config import (
     MODEL_VERSION,
     SCHEMA_VERSION,
     SERVICE_VERSION,
+    VISUAL_REVIEW_ENABLED,
+    VISUAL_REVIEW_MODEL,
+    VISUAL_REVIEW_TIMEOUT_SECONDS,
 )
 from app.schemas import HealthResponse, VersionResponse
 from app.services.count_risk import find_suspicious_fragment_pairs
 from app.services.detector import run_inference
 from app.services.quality import assess_image_quality
 from app.services.runtime import memory_snapshot
+from app.services.visual_review import assess_visual_review
 
 app = FastAPI(title="CVision Box Intake API")
 logger = logging.getLogger("uvicorn.error")
+
+
+@app.get("/")
+def root() -> dict[str, str]:
+    """Describe the service when its base URL is opened in a browser."""
+    return {
+        "service": "CVision Box Intake API",
+        "status": "ok",
+        "health": "/health",
+        "documentation": "/docs",
+    }
 
 
 @app.get("/health", response_model=HealthResponse)
@@ -207,6 +223,46 @@ async def infer(response: Response, file: UploadFile = File(...)) -> dict:
     _, buffer = cv2.imencode(".jpg", annotated)
     annotated_b64 = base64.b64encode(buffer).decode("utf-8")
 
+    review_assessment = {
+        "status": "disabled",
+        "provider": "google_gemini",
+        "model": None,
+        "visual_review_required": False,
+        "visual_risk_reasons": [],
+        "summary": None,
+        "operator_guidance": None,
+        "novel_reason": None,
+        "confidence": None,
+    }
+    if VISUAL_REVIEW_ENABLED:
+        review_assessment = await asyncio.to_thread(
+            assess_visual_review,
+            annotated,
+            detection_list,
+            review_reasons,
+            quality_flags,
+            model=VISUAL_REVIEW_MODEL,
+            timeout_seconds=VISUAL_REVIEW_TIMEOUT_SECONDS,
+        )
+        for reason in review_assessment["visual_risk_reasons"]:
+            if reason not in review_reasons:
+                review_reasons.append(reason)
+        if review_assessment["novel_reason"]:
+            logger.warning(
+                "%s",
+                json.dumps(
+                    {
+                        "event": "novel_visual_risk_detected",
+                        "request_id": request_id,
+                        "reason_code": "other_visual_risk",
+                        "novel_reason": review_assessment["novel_reason"],
+                        "model": review_assessment["model"],
+                        "provider": review_assessment["provider"],
+                        "confidence": review_assessment["confidence"],
+                    }
+                ),
+            )
+
     processing_time_ms = round((time.time() - start_time) * 1000)
     runtime_memory = memory_snapshot()
     if runtime_memory["current_rss_mb"] is not None:
@@ -242,6 +298,7 @@ async def infer(response: Response, file: UploadFile = File(...)) -> dict:
         "confidence_score": confidence_score,
         "human_review_required": len(review_reasons) > 0,
         "review_reasons": review_reasons,
+        "review_assessment": review_assessment,
         "count_risk": {
             "suspicious_fragment_pair_count": len(suspicious_pairs),
         },
