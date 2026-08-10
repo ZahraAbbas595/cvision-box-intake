@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 REVIEW_REASON_MESSAGES = {
     "no_boxes_detected": "No clearly identifiable boxes were found.",
     "low_confidence_detection": (
@@ -51,11 +49,6 @@ QUALITY_FLAG_MESSAGES = {
 }
 
 
-def preferred_backend_url(environment_url: str, secret_url: str = "") -> str:
-    """Prefer an explicit process URL over an optional Streamlit secret."""
-    return environment_url.strip() or secret_url.strip()
-
-
 def explain_review_reasons(reason_codes: list[str]) -> list[str]:
     """Map stable API reason codes to concise, plain-language explanations."""
     return [
@@ -72,22 +65,3 @@ def explain_quality_flags(flag_codes: list[str]) -> list[str]:
         QUALITY_FLAG_MESSAGES.get(code, "the image has an unknown quality issue")
         for code in flag_codes
     ]
-
-
-def review_display_state(
-    reason_codes: list[str],
-    quality_flags: list[str],
-    assessment: Any,
-) -> tuple[bool, list[str]]:
-    """Reconcile deterministic and model review signals for operator display."""
-    visual_review_required = (
-        isinstance(assessment, dict)
-        and assessment.get("status") == "completed"
-        and assessment.get("visual_review_required") is True
-    )
-    displayed_codes = [
-        code
-        for code in reason_codes
-        if not (code == "poor_image_quality" and quality_flags)
-    ]
-    return visual_review_required, displayed_codes

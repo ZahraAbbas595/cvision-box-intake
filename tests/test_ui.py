@@ -1,3 +1,6 @@
+import importlib
+import sys
+import types
 from unittest.mock import patch
 
 import requests
@@ -10,24 +13,34 @@ from ui.client import (
     normalize_backend_url,
     validate_upload,
 )
-from ui.presentation import (
-    explain_quality_flags,
-    explain_review_reasons,
-    preferred_backend_url,
-    review_display_state,
-)
+from ui.presentation import explain_quality_flags, explain_review_reasons
+
+
+def _load_streamlit_app_without_streamlit() -> types.ModuleType:
+    """Load the entry point with a tiny fake Streamlit module, as CI does."""
+    fake_streamlit = types.ModuleType("streamlit")
+    fake_streamlit.set_page_config = lambda **_kwargs: None  # type: ignore[attr-defined]
+    fake_streamlit.secrets = {}  # type: ignore[attr-defined]
+    fake_errors = types.ModuleType("streamlit.errors")
+
+    class FakeSecretNotFoundError(Exception):
+        pass
+
+    fake_errors.StreamlitSecretNotFoundError = (  # type: ignore[attr-defined]
+        FakeSecretNotFoundError
+    )
+    with patch.dict(
+        sys.modules,
+        {"streamlit": fake_streamlit, "streamlit.errors": fake_errors},
+    ):
+        sys.modules.pop("ui.streamlit_app", None)
+        return importlib.import_module("ui.streamlit_app")
 
 
 def test_normalize_backend_url_removes_trailing_slash() -> None:
     assert normalize_backend_url("https://api.example.com/") == (
         "https://api.example.com"
     )
-
-
-def test_backend_configuration_prefers_environment_over_secret() -> None:
-    assert preferred_backend_url(
-        "http://127.0.0.1:8000", "https://secret.example.com"
-    ) == ("http://127.0.0.1:8000")
 
 
 def test_normalize_backend_url_rejects_non_http_value() -> None:
@@ -86,14 +99,10 @@ def test_quality_flags_ask_for_a_better_image_in_plain_language() -> None:
 
 
 def test_quality_only_review_does_not_show_no_risk_model_guidance() -> None:
-    assessment = {
-        "status": "completed",
-        "visual_review_required": False,
-        "summary": "The carton has no identifiable visual risks.",
-        "operator_guidance": "Process the carton as usual.",
-    }
+    streamlit_app = _load_streamlit_app_without_streamlit()
+    assessment = {"status": "completed", "visual_review_required": False}
 
-    visual_review_required, displayed_codes = review_display_state(
+    visual_review_required, displayed_codes = streamlit_app.review_display_state(
         ["poor_image_quality"], ["possible_blur"], assessment
     )
 
@@ -102,9 +111,10 @@ def test_quality_only_review_does_not_show_no_risk_model_guidance() -> None:
 
 
 def test_visual_risk_remains_visible_alongside_quality_banner() -> None:
+    streamlit_app = _load_streamlit_app_without_streamlit()
     assessment = {"status": "completed", "visual_review_required": True}
 
-    visual_review_required, displayed_codes = review_display_state(
+    visual_review_required, displayed_codes = streamlit_app.review_display_state(
         ["poor_image_quality", "reflection_or_shadow"],
         ["underexposed"],
         assessment,

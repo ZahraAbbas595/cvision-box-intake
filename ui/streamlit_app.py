@@ -12,18 +12,10 @@ from streamlit.errors import StreamlitSecretNotFoundError
 
 try:
     from ui.client import BackendError, analyze_image, validate_upload
-    from ui.presentation import (
-        explain_review_reasons,
-        preferred_backend_url,
-        review_display_state,
-    )
+    from ui.presentation import explain_review_reasons
 except ModuleNotFoundError:  # Streamlit Cloud can execute this file as a script.
     from client import BackendError, analyze_image, validate_upload
-    from presentation import (
-        explain_review_reasons,
-        preferred_backend_url,
-        review_display_state,
-    )
+    from presentation import explain_review_reasons
 
 QUALITY_FLAG_MESSAGES = {
     "low_resolution": "the image resolution is too low",
@@ -39,11 +31,30 @@ def configured_backend_url() -> str:
     """Read the backend URL from Streamlit secrets or the process environment."""
     environment_url = os.getenv("BACKEND_URL", "").strip()
     if environment_url:
-        return preferred_backend_url(environment_url)
+        return environment_url
     try:
-        return preferred_backend_url("", str(st.secrets.get("BACKEND_URL", "")))
+        return str(st.secrets.get("BACKEND_URL", "")).strip()
     except StreamlitSecretNotFoundError:
         return ""
+
+
+def review_display_state(
+    reason_codes: list[str],
+    quality_flags: list[str],
+    assessment: Any,
+) -> tuple[bool, list[str]]:
+    """Reconcile deterministic and model review signals without imported helpers."""
+    visual_review_required = (
+        isinstance(assessment, dict)
+        and assessment.get("status") == "completed"
+        and assessment.get("visual_review_required") is True
+    )
+    displayed_codes = [
+        code
+        for code in reason_codes
+        if not (code == "poor_image_quality" and quality_flags)
+    ]
+    return visual_review_required, displayed_codes
 
 
 def render_result(result: dict[str, Any], original_bytes: bytes) -> None:
