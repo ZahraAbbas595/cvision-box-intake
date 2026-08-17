@@ -16,9 +16,9 @@ warehouse counting or a production deployment claim.
 | Production inference | ONNX Runtime on CPU |
 | Development inference | Fine-tuned YOLOv8n through PyTorch |
 | Current project and service version | `0.8.0` |
-| Reviewed evaluation set | 31 images |
-| Full-set exact-count accuracy | 18/31, or 58.1% |
-| Supported-scene exact-count accuracy | 18/30, or 60.0% |
+| Locked truck evaluation set | 105 images, 8,107 cartons |
+| External precision / recall | 89.9% / 84.7% |
+| External mAP50 / mAP50-95 | 89.0% / 66.7% |
 | Human-review routing | Implemented; never changes counts automatically |
 | Streamlit frontend | Deployed on Streamlit Community Cloud |
 | Production readiness | Research prototype only |
@@ -35,8 +35,8 @@ warehouse counting or a production deployment claim.
 - Streamlit prototype: <https://cvision-box-intake.streamlit.app/>
 
 The frontend deploys from `dev` and reads the Render URL from an encrypted
-Streamlit secret. See `docs/deployment_acceptance.md` for live clear-scene and
-difficult-scene smoke evidence.
+Streamlit secret. Manual truck-image acceptance is recorded in
+`docs/truck_model_evaluation.md`.
 
 Operators can either select a JPEG/PNG file or capture a new photo using the
 device camera. When the backend flags blur, poor exposure, or low resolution,
@@ -121,7 +121,7 @@ Example request:
 
 ```powershell
 curl.exe -X POST "http://127.0.0.1:8000/v1/box-intake/infer" `
-  -F "file=@eval/dataset/images/img_001.jpg"
+  -F "file=@C:\path\to\truck-image.jpg"
 ```
 
 ### Response Shape
@@ -160,10 +160,10 @@ curl.exe -X POST "http://127.0.0.1:8000/v1/box-intake/infer" `
     "suspicious_fragment_pair_count": 0
   },
   "model": {
-    "name": "carton-yolov8n",
-    "version": "ft-v1",
-    "conf_threshold": 0.47,
-    "iou_threshold": 0.25,
+    "name": "carton-yolov8n-truck",
+    "version": "ft-truck-v1",
+    "conf_threshold": 0.45,
+    "iou_threshold": 0.30,
     "backend": "onnx"
   },
   "service": {
@@ -216,11 +216,9 @@ different distance.
 | --- | --- |
 | `app/` | FastAPI application, configuration, schemas, inference, quality, review logic, and telemetry |
 | `tests/` | Endpoint, preprocessing, NMS, quality, and count-risk regression tests |
-| `eval/dataset/` | Tracked 31-image evaluation set and reviewed count manifest |
-| `eval/` | Reproducible evaluation, risk-analysis, and threshold-tuning utilities |
 | `scripts/` | Training, leakage audit, benchmarking, ONNX export, Render build, and deployment smoke test |
 | `models/` | Selected committed PyTorch checkpoint; exported ONNX remains generated |
-| `docs/` | Model decisions, annotated examples, error analysis, deployment evidence, and handoff guidance |
+| `docs/` | Current model decision and truck-scope evaluation evidence |
 | `.github/workflows/ci.yml` | Pull-request and permanent-branch quality gate |
 | `render.yaml` | Render Free backend blueprint |
 | `requirements.txt` | Development, training, and ONNX-export dependencies |
@@ -276,11 +274,18 @@ streamlit run ui/streamlit_app.py
 Local development defaults to the committed PyTorch model. To exercise ONNX
 locally, export the model first and set `MODEL_BACKEND=onnx`.
 
+To test another PyTorch checkpoint without replacing the production model, set
+`MODEL_PATH`, `MODEL_NAME`, and `MODEL_VERSION` before starting the API. Relative
+model paths resolve from the repository root.
+
 ## Configuration
 
 | Variable | Local default | Purpose |
 | --- | ---: | --- |
 | `MODEL_BACKEND` | `pytorch` | Select `pytorch` or `onnx` inference |
+| `MODEL_PATH` | `models/carton_yolov8n_truck_best.pt` | Selected model checkpoint |
+| `MODEL_NAME` | `carton-yolov8n-truck` | Model name returned by the API |
+| `MODEL_VERSION` | `ft-truck-v1` | Model version returned by the API |
 | `CONF_THRESHOLD` | `0.45` | Minimum accepted detection confidence |
 | `IOU_THRESHOLD` | `0.30` | NMS overlap threshold |
 | `INFERENCE_IMAGE_SIZE` | `640` | Detector input target size |
@@ -314,7 +319,7 @@ therefore be reviewed and promoted into stable reason codes without hardcoding
 every possible visual failure in advance.
 
 Fragment-geometry variables are also listed in `sample.env`. Render overrides
-the confidence and IoU settings to the validated ONNX values `0.47` and `0.25`.
+the confidence and IoU settings to the truck-candidate values `0.45` and `0.30`.
 
 ## Validation
 
@@ -329,57 +334,24 @@ python -m pytest -q
 
 CI runs on pull requests and pushes to `dev`, `stage`, or `main` using Python 3.11.
 
-## Evaluation
+## Truck-Scope Evaluation
 
-The reviewed count source of truth is
-`eval/dataset/ground_truth.json`. Run the standard evaluator with:
-
-```powershell
-python eval/run_eval.py
-```
-
-Additional evidence utilities:
-
-```powershell
-python eval/tune_thresholds.py
-python eval/tune_onnx_thresholds.py
-python eval/analyze_count_risks.py
-```
-
-Current reviewed ONNX results:
-
-| Metric | Full set | Supported scenes |
-| --- | ---: | ---: |
-| Images | 31 | 30 |
-| Exact counts | 18 | 18 |
-| Exact-count accuracy | 58.1% | 60.0% |
-| Mean absolute count error | 1.42 | 1.43 |
-| Overcount images | 6 | 5 |
-| Undercount images | 7 | 7 |
-
-The supported-scene subset excludes only the predeclared reflection case while
-the full-set result remains the primary honest metric. See
-`docs/error_analysis.md` for every mismatch, the error taxonomy, and visual
-examples.
-
-Generated CSVs, contact sheets, broad overlay runs, and response captures remain
-ignored. Only five explicitly curated historical baseline overlays are tracked
-under `docs/examples/`.
+The locked external truck test set contains 105 images and 8,107 annotated
+cartons. The `ft-truck-v1` candidate achieved precision `0.899`, recall `0.847`,
+mAP50 `0.890`, and mAP50-95 `0.667`. See
+`docs/truck_model_evaluation.md` for provenance, label normalization, ONNX
+parity, and manual acceptance evidence.
 
 ## Model History
 
 1. Generic COCO YOLOv8n was rejected because COCO has no carton class.
 2. YOLO-World proved zero-shot carton detection was possible but overcounted
    crowded scenes and exceeded Render Free memory.
-3. A carton-specific YOLOv8n model was fine-tuned from a public Roboflow
-   dataset.
-4. PyTorch inference still exceeded the free-instance memory budget.
-5. Dynamic-shape ONNX Runtime became the production path and remained safely
-   below 512 MB during live smoke testing.
+3. A general carton-specific YOLOv8n established the fine-tuning path.
+4. The current `ft-truck-v1` YOLOv8n specializes the application for cartons
+   inside trucks and uses dynamic-shape ONNX in deployment.
 
-Model provenance, leakage limitations, training metrics, and runtime evidence
-are documented in `docs/model_decision.md`, `docs/finetuning_findings.md`, and
-`docs/production_inference_validation.md`.
+The current rationale is documented in `docs/model_decision.md`.
 
 ## Training and Reproducibility
 
@@ -389,7 +361,7 @@ application.
 To reproduce fine-tuning with the local ignored Roboflow dataset:
 
 ```powershell
-python scripts/train_yolov8.py --data dataset/data.yaml
+python scripts/train_yolov8.py --data dataset2/data.yaml --name carton_counter_truck
 ```
 
 To reproduce the dataset leakage audit:
@@ -425,14 +397,14 @@ Deployment smoke test:
 ```powershell
 python scripts/smoke_render.py `
   https://cvision-box-intake-api.onrender.com `
-  eval/dataset/images/img_001.jpg
+  C:\path\to\truck-image.jpg
 ```
 
 ## Troubleshooting
 
 ### Model file is missing
 
-Confirm `models/carton_yolov8n_best.pt` exists. ONNX mode additionally requires
+Confirm `models/carton_yolov8n_truck_best.pt` exists. ONNX mode additionally requires
 the generated `.onnx` file; run `scripts/export_onnx.py` locally or let the
 Render build create it.
 
@@ -473,20 +445,16 @@ local artifacts and must remain uncommitted.
   inflates conventional validation metrics.
 - The API has no authentication, secure evidence store, retention policy,
   monitoring service, WMS/POD integration, or review-feedback pipeline.
-- Manual iframe upload, cold-start, timeout, and backend-outage acceptance
-  checks remain before the final release.
+- Manual public-UI upload, cold-start, timeout, and backend-outage acceptance
+  checks were confirmed by the project owner on 2026-08-12.
 
 ## Documentation Map
 
 | Document | Purpose |
 | --- | --- |
 | `CHANGELOG.md` | Milestones and differences from previous project stages |
-| `docs/model_decision.md` | Baseline experiments and model selection |
-| `docs/finetuning_findings.md` | Training, leakage, count, and runtime evidence |
-| `docs/production_inference_validation.md` | ONNX parity, threshold, memory, and live deployment evidence |
-| `docs/error_analysis.md` | Current reviewed metrics, mismatches, taxonomy, examples, and limitations |
-| `docs/examples/README.md` | Curated annotated historical baseline overlays |
-| `docs/handoff_and_cleanup.md` | Supported workflow, cleanup policy, and release checklist |
+| `docs/model_decision.md` | Current model choice and rejected alternatives |
+| `docs/truck_model_evaluation.md` | Truck-model training, external-test, parity, and acceptance evidence |
 
 ## Git and Contribution Workflow
 
@@ -508,13 +476,6 @@ evaluation artifact directories without an explicit reviewed exception.
 
 ## Next Milestone
 
-The next sprint priority is a Streamlit interface that:
-
-1. uploads and previews an image;
-2. calls the hosted FastAPI backend;
-3. displays annotated evidence, count, sizes, confidence, and review reasons;
-4. offers the structured result for download;
-5. handles Render cold starts, timeouts, and backend failures clearly.
-
-After frontend deployment and end-to-end acceptance testing, promote the stable
-`dev` state to `main` through a release pull request.
+The Streamlit interface and end-to-end acceptance flow are complete. The next
+release step is to run the final quality gate and promote the stable `dev` state
+to `main` through a reviewed pull request.

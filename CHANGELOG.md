@@ -11,6 +11,13 @@ available.
 
 ### Added
 
+- Environment-configurable model paths and identity metadata for safely testing
+  candidate checkpoints without replacing the production model.
+- A reproducible external truck-carton test-set builder that combines Roboflow
+  splits, prevents filename collisions, and normalizes source labels to `Box`.
+- Per-source external evaluation of exact carton counts and mean absolute error.
+- An application-level PyTorch/ONNX count-parity gate for candidate models.
+
 - An opt-in, fail-safe vision reviewer that can add allow-listed visual-risk
   reasons for occlusion, reflections or shadows, confusing scenes, damaged
   cartons, and non-carton lookalikes, plus concise operator guidance. It never
@@ -44,6 +51,11 @@ available.
 
 ### Changed
 
+- Selected the truck-specific YOLOv8n checkpoint as the default local and
+  build-time model candidate while retaining the earlier checkpoint for rollback.
+- Aligned candidate inference defaults at confidence `0.45` and IoU `0.30`.
+- Declared the ONNX exporter dependency required by the reproducible export
+  script.
 - Reconciled deterministic quality review with advisory model output in the UI:
   quality-only cases now show the specific retake message without contradictory
   no-risk summaries, routine-processing guidance, or duplicate technical signals.
@@ -57,6 +69,13 @@ available.
 - Made optional Linux memory telemetry fail safely when `/proc/self/status`
   cannot be read or contains malformed values.
 - Extended CI to run on `stage` and type-check the stable pure-service modules.
+
+### Removed
+
+- The redundant handoff/cleanup document, obsolete example overlays, general
+  carton evaluation dataset and utilities, superseded model checkpoint, and
+  legacy evidence documents tied to the earlier scope. Git history retains
+  these artifacts if historical investigation is required.
 
 ## [0.8.0] - 2026-08-04
 

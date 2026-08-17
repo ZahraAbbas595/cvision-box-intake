@@ -1,6 +1,9 @@
 """Central configuration values loaded from environment variables."""
 
 import os
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _env_flag(name: str, default: bool = False) -> bool:
@@ -8,9 +11,18 @@ def _env_flag(name: str, default: bool = False) -> bool:
     return os.getenv(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _resolve_model_path(value: str) -> Path:
+    """Resolve an absolute or repository-relative model path."""
+    path = Path(value).expanduser()
+    return path.resolve() if path.is_absolute() else (ROOT / path).resolve()
+
+
 CONF_THRESHOLD = float(os.getenv("CONF_THRESHOLD", "0.45"))
 IOU_THRESHOLD = float(os.getenv("IOU_THRESHOLD", "0.30"))
 MODEL_BACKEND = os.getenv("MODEL_BACKEND", "pytorch").lower()
+MODEL_PATH = _resolve_model_path(
+    os.getenv("MODEL_PATH", "models/carton_yolov8n_truck_best.pt")
+)
 INFERENCE_IMAGE_SIZE = int(os.getenv("INFERENCE_IMAGE_SIZE", "640"))
 MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(10 * 1024 * 1024)))
 MIN_IMAGE_DIMENSION = int(os.getenv("MIN_IMAGE_DIMENSION", "200"))
@@ -33,6 +45,6 @@ VISUAL_REVIEW_TIMEOUT_SECONDS = float(
     os.getenv("VISUAL_REVIEW_TIMEOUT_SECONDS", "12.0")
 )
 SERVICE_VERSION = "0.8.0"
-MODEL_NAME = "carton-yolov8n"
-MODEL_VERSION = "ft-v1"
+MODEL_NAME = os.getenv("MODEL_NAME", "carton-yolov8n-truck")
+MODEL_VERSION = os.getenv("MODEL_VERSION", "ft-truck-v1")
 SCHEMA_VERSION = "1.1"

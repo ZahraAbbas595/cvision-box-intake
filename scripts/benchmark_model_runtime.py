@@ -21,7 +21,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--model",
         type=Path,
-        default=ROOT / "models" / "carton_yolov8n_best.pt",
+        default=ROOT / "models" / "carton_yolov8n_truck_best.pt",
     )
     parser.add_argument(
         "--images",

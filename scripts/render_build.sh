@@ -21,7 +21,7 @@ from pathlib import Path
 import cv2
 import onnxruntime
 
-model_path = Path("models/carton_yolov8n_best.onnx")
+model_path = Path("models/carton_yolov8n_truck_best.onnx")
 if not model_path.exists():
     raise SystemExit(f"Missing exported model: {model_path}")
 session = onnxruntime.InferenceSession(
