@@ -30,7 +30,6 @@ class PyTorchDetector:
 
     def __init__(self) -> None:
         import torch
-
         from ultralytics import YOLO
 
         if not MODEL_PATH.is_file():

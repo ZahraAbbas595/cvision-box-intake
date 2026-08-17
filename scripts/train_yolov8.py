@@ -6,7 +6,6 @@ import argparse
 from pathlib import Path
 
 import torch
-
 from ultralytics import YOLO
 
 ROOT = Path(__file__).resolve().parents[1]

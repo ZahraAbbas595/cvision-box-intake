@@ -72,8 +72,10 @@ available.
 
 ### Removed
 
-- The redundant handoff/cleanup document and obsolete deployed-model example
-  overlays tied to the earlier general evaluation scope.
+- The redundant handoff/cleanup document, obsolete example overlays, general
+  carton evaluation dataset and utilities, superseded model checkpoint, and
+  legacy evidence documents tied to the earlier scope. Git history retains
+  these artifacts if historical investigation is required.
 
 ## [0.8.0] - 2026-08-04
 

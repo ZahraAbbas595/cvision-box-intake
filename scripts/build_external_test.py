@@ -132,9 +132,7 @@ def main() -> None:
     args = parse_args()
     sources = (
         DatasetSource("boxintake", args.root / "boxintake", frozenset({1, 4})),
-        DatasetSource(
-            "carton_loading", args.root / "carton_loading", frozenset({0})
-        ),
+        DatasetSource("carton_loading", args.root / "carton_loading", frozenset({0})),
     )
     print(json.dumps(build_dataset(sources, args.output), indent=2))
 

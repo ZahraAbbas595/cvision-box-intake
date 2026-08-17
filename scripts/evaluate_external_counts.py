@@ -39,9 +39,7 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=ROOT / "runs/detect/carton_counter_truck/weights/best.pt",
     )
-    parser.add_argument(
-        "--dataset", type=Path, default=ROOT / "external_test/combined"
-    )
+    parser.add_argument("--dataset", type=Path, default=ROOT / "external_test/combined")
     parser.add_argument("--confidence", type=float, default=0.25)
     return parser.parse_args()
 

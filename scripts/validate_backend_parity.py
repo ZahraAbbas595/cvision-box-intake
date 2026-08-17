@@ -26,11 +26,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--report",
         type=Path,
-        default=ROOT / "eval/results/truck_backend_parity.json",
+        default=ROOT / "runs/evaluation/truck_backend_parity.json",
     )
-    parser.add_argument(
-        "--worker-backend", choices=("pytorch", "onnx"), default=None
-    )
+    parser.add_argument("--worker-backend", choices=("pytorch", "onnx"), default=None)
     parser.add_argument("--worker-output", type=Path, default=None)
     return parser.parse_args()
 
@@ -96,9 +94,7 @@ def compare_backends(args: argparse.Namespace) -> None:
         pytorch_counts = collect_counts(
             "pytorch", args.images, temporary_root / "pytorch.json"
         )
-        onnx_counts = collect_counts(
-            "onnx", args.images, temporary_root / "onnx.json"
-        )
+        onnx_counts = collect_counts("onnx", args.images, temporary_root / "onnx.json")
 
     image_names = sorted(path.name for path in paths)
     mismatches: list[tuple[str, int, int]] = []

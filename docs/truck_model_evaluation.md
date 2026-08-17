@@ -49,4 +49,5 @@ its accepted carton count matched the PyTorch backend on every image: 105 of
 - Confidence threshold: `0.45`
 - IoU threshold: `0.30`
 
-The earlier `models/carton_yolov8n_best.pt` remains available for rollback.
+The earlier general-carton checkpoint remains recoverable from Git history if
+rollback evidence is needed.

@@ -10,7 +10,6 @@ from pathlib import Path
 
 import psutil
 import torch
-
 from ultralytics import YOLO
 
 ROOT = Path(__file__).resolve().parents[1]
