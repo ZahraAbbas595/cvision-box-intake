@@ -1,12 +1,12 @@
 # CVision Box Intake
 
-Research prototype for detecting and counting visible cardboard cartons from a
-single image before barcode or OCR confirmation.
+Research prototype for detecting and counting visible cardboard cartons/boxes
+inside a truck from a single image before barcode or OCR confirmation.
 
 The service returns detection evidence, relative size classes, image-quality
 signals, and conservative human-review guidance. It is designed to demonstrate
 an understandable and testable computer-vision workflow—not autonomous
-warehouse counting or a production deployment claim.
+truck-load counting or a production deployment claim.
 
 ## Project Status
 
@@ -19,7 +19,8 @@ warehouse counting or a production deployment claim.
 | Locked truck evaluation set | 105 images, 8,107 cartons |
 | External precision / recall | 89.9% / 84.7% |
 | External mAP50 / mAP50-95 | 89.0% / 66.7% |
-| Human-review routing | Implemented; never changes counts automatically |
+| Highest observed Render peak RSS | 426.4 MB of 512 MB |
+| Human-review routing | Deterministic rules plus optional advisory Gemini review; never changes counts automatically |
 | Streamlit frontend | Deployed on Streamlit Community Cloud |
 | Production readiness | Research prototype only |
 
@@ -48,8 +49,8 @@ service can cold-start after inactivity.
 
 ## Problem and Scope
 
-An intake operator often needs a visual estimate of the physical load before
-identifying every carton individually. This prototype answers:
+An intake operator often needs a visual estimate of the cartons/boxes inside a
+truck before identifying every carton individually. This prototype answers:
 
 - How many distinct cartons are visibly identifiable?
 - Where are they in the image?
@@ -71,8 +72,10 @@ flowchart LR
     V --> Q["Image-quality checks"]
     Q --> D["YOLOv8n detector"]
     D --> P["Confidence filtering and NMS"]
-    P --> R["Size classification and review rules"]
+    P --> R["Size classification and deterministic review rules"]
     R --> E["JSON evidence record and annotated image"]
+    R -. "optional annotated-image assessment" .-> G["Gemini vision-language reviewer"]
+    G -. "allow-listed risks and guidance only" .-> E
     D -. "local development" .-> T["PyTorch"]
     D -. "Render Free" .-> O["ONNX Runtime"]
 ```
@@ -156,6 +159,17 @@ curl.exe -X POST "http://127.0.0.1:8000/v1/box-intake/infer" `
   "confidence_score": 0.93,
   "human_review_required": false,
   "review_reasons": [],
+  "review_assessment": {
+    "status": "completed",
+    "provider": "google_gemini",
+    "model": "gemini-3.1-flash-lite",
+    "visual_review_required": false,
+    "visual_risk_reasons": [],
+    "summary": "No additional visual count risk identified.",
+    "operator_guidance": "Review the marked cartons before confirming intake.",
+    "novel_reason": null,
+    "confidence": 0.82
+  },
   "count_risk": {
     "suspicious_fragment_pair_count": 0
   },
@@ -178,9 +192,14 @@ curl.exe -X POST "http://127.0.0.1:8000/v1/box-intake/infer" `
 }
 ```
 
-The example illustrates the contract; numeric values vary by image and runtime.
+The example illustrates the contract with optional Gemini review enabled;
+numeric values vary by image and runtime. With review disabled, the same
+`review_assessment` object reports `status: "disabled"`. Provider or validation
+failures report `status: "unavailable"` without failing detector inference.
 
 ## Review and Quality Signals
+
+Deterministic signals always run locally and remain authoritative for routing:
 
 | Reason | Trigger | Meaning |
 | --- | --- | --- |
@@ -194,6 +213,29 @@ The example illustrates the contract; numeric values vary by image and runtime.
 Image-quality flags are `low_resolution`, `possible_blur`, `underexposed`, and
 `overexposed`. They apply a review-only confidence penalty and never alter
 detections.
+
+When `VISUAL_REVIEW_ENABLED=true`, the service can additionally send the
+annotated image and limited detector metadata to the configured Gemini
+vision-language model. This assessment is advisory: it may add an allow-listed
+reason and concise operator guidance, but it cannot recount cartons, change
+bounding boxes, remove deterministic reasons, or provide a corrected count.
+
+| Gemini reason | Visual concern |
+| --- | --- |
+| `possible_occlusion` | Visible cartons or boundaries may be blocked |
+| `reflection_or_shadow` | Reflections or shadows may resemble or hide cartons |
+| `unusual_non_carton_objects` | Windows, furniture, containers, or other lookalikes may cause false positives |
+| `confusing_background` | Scene texture or structure may obscure carton boundaries |
+| `damaged_or_deformed_cartons` | Damage or deformation may split or hide carton evidence |
+| `ambiguous_small_objects` | Small regions may not be reliably distinguishable as cartons |
+| `other_visual_risk` | A concrete novel risk that fits none of the stable categories |
+
+Gemini output is constrained to a JSON schema and validated again by the
+application. `other_visual_risk` requires a non-empty `novel_reason` and emits a
+structured log for later taxonomy review. The prompt instructs the reviewer to
+ignore text or instructions inside uploaded images. Missing credentials,
+provider errors, malformed output, or timeouts produce an `unavailable`
+assessment and leave the deterministic response intact.
 
 ## Relative Size Classes
 
@@ -214,17 +256,19 @@ different distance.
 
 | Path | Purpose |
 | --- | --- |
-| `app/` | FastAPI application, configuration, schemas, inference, quality, review logic, and telemetry |
-| `tests/` | Endpoint, preprocessing, NMS, quality, and count-risk regression tests |
-| `scripts/` | Training, leakage audit, benchmarking, ONNX export, Render build, and deployment smoke test |
-| `models/` | Selected committed PyTorch checkpoint; exported ONNX remains generated |
-| `docs/` | Current model decision and truck-scope evaluation evidence |
+| `app/` | FastAPI application, model backends, deterministic checks, optional Gemini review, and telemetry |
+| `ui/` | Streamlit upload/camera interface, typed backend client, and operator guidance |
+| `tests/` | API, detector, quality, review, runtime, and UI regression tests |
+| `scripts/` | Truck-dataset preparation/evaluation, training, leakage audit, parity, ONNX export, and deployment tools |
+| `models/` | Committed truck-specific PyTorch checkpoint; generated ONNX remains ignored |
+| `docs/` | Current model decision and locked truck-scope evaluation evidence |
 | `.github/workflows/ci.yml` | Pull-request and permanent-branch quality gate |
+| `.streamlit/config.toml` | Non-secret Streamlit application configuration |
 | `render.yaml` | Render Free backend blueprint |
+| `sample.env` | Non-secret local configuration examples, including optional visual review |
 | `requirements.txt` | Development, training, and ONNX-export dependencies |
 | `requirements-render.txt` | Lightweight production runtime dependencies |
 | `requirements-ui.txt` | Streamlit frontend dependencies |
-| `ui/` | Thin frontend, typed API client, and review explanations |
 
 ## Local Development
 
@@ -326,9 +370,9 @@ the confidence and IoU settings to the truck-candidate values `0.45` and `0.30`.
 Run the same supported checks as CI:
 
 ```powershell
-python -m ruff check app tests
-python -m ruff format --check app tests
-python -m mypy app/config.py app/schemas.py app/services/count_risk.py app/services/quality.py app/services/runtime.py
+python -m ruff check app ui tests
+python -m ruff format --check app ui tests
+python -m mypy app/config.py app/schemas.py app/services/count_risk.py app/services/quality.py app/services/runtime.py ui/client.py ui/presentation.py
 python -m pytest -q
 ```
 
@@ -476,6 +520,7 @@ evaluation artifact directories without an explicit reviewed exception.
 
 ## Next Milestone
 
-The Streamlit interface and end-to-end acceptance flow are complete. The next
-release step is to run the final quality gate and promote the stable `dev` state
-to `main` through a reviewed pull request.
+Development CI, Render ONNX deployment, memory headroom, API inference, Gemini
+review, and Streamlit truck-image smoke checks are complete. The next release
+step is a reviewed pull request from `dev` to `stage`, followed by staging smoke
+checks. Promotion from `stage` to `main` remains a separate approval gate.
