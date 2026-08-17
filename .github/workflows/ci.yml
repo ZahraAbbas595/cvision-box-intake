@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [dev, stage, main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install application and development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          python -m pip install -e ".[dev]"
+
+      - name: Lint
+        run: python -m ruff check app ui tests
+
+      - name: Check formatting
+        run: python -m ruff format --check app ui tests
+
+      - name: Type-check application boundaries and pure services
+        run: >-
+          python -m mypy
+          app/config.py
+          app/schemas.py
+          app/services/count_risk.py
+          app/services/quality.py
+          app/services/runtime.py
+          ui/client.py
+          ui/presentation.py
+
+      - name: Run targeted tests
+        run: python -m pytest -q
