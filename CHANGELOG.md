@@ -70,6 +70,11 @@ available.
   cannot be read or contains malformed values.
 - Extended CI to run on `stage` and type-check the stable pure-service modules.
 
+### Removed
+
+- The redundant handoff/cleanup document and obsolete deployed-model example
+  overlays tied to the earlier general evaluation scope.
+
 ## [0.8.0] - 2026-08-04
 
 ### Project Handoff and Week 2 Completion

@@ -160,10 +160,10 @@ curl.exe -X POST "http://127.0.0.1:8000/v1/box-intake/infer" `
     "suspicious_fragment_pair_count": 0
   },
   "model": {
-    "name": "carton-yolov8n",
-    "version": "ft-v1",
-    "conf_threshold": 0.47,
-    "iou_threshold": 0.25,
+    "name": "carton-yolov8n-truck",
+    "version": "ft-truck-v1",
+    "conf_threshold": 0.45,
+    "iou_threshold": 0.30,
     "backend": "onnx"
   },
   "service": {
@@ -276,11 +276,18 @@ streamlit run ui/streamlit_app.py
 Local development defaults to the committed PyTorch model. To exercise ONNX
 locally, export the model first and set `MODEL_BACKEND=onnx`.
 
+To test another PyTorch checkpoint without replacing the production model, set
+`MODEL_PATH`, `MODEL_NAME`, and `MODEL_VERSION` before starting the API. Relative
+model paths resolve from the repository root.
+
 ## Configuration
 
 | Variable | Local default | Purpose |
 | --- | ---: | --- |
 | `MODEL_BACKEND` | `pytorch` | Select `pytorch` or `onnx` inference |
+| `MODEL_PATH` | `models/carton_yolov8n_truck_best.pt` | Selected model checkpoint |
+| `MODEL_NAME` | `carton-yolov8n-truck` | Model name returned by the API |
+| `MODEL_VERSION` | `ft-truck-v1` | Model version returned by the API |
 | `CONF_THRESHOLD` | `0.45` | Minimum accepted detection confidence |
 | `IOU_THRESHOLD` | `0.30` | NMS overlap threshold |
 | `INFERENCE_IMAGE_SIZE` | `640` | Detector input target size |
@@ -314,7 +321,7 @@ therefore be reviewed and promoted into stable reason codes without hardcoding
 every possible visual failure in advance.
 
 Fragment-geometry variables are also listed in `sample.env`. Render overrides
-the confidence and IoU settings to the validated ONNX values `0.47` and `0.25`.
+the confidence and IoU settings to the truck-candidate values `0.45` and `0.30`.
 
 ## Validation
 
@@ -329,9 +336,17 @@ python -m pytest -q
 
 CI runs on pull requests and pushes to `dev`, `stage`, or `main` using Python 3.11.
 
-## Evaluation
+## Truck-Scope Evaluation
 
-The reviewed count source of truth is
+The locked external truck test set contains 105 images and 8,107 annotated
+cartons. The `ft-truck-v1` candidate achieved precision `0.899`, recall `0.847`,
+mAP50 `0.890`, and mAP50-95 `0.667`. See
+`docs/truck_model_evaluation.md` for provenance, label normalization, ONNX
+parity, and manual acceptance evidence.
+
+## Historical General-Carton Evaluation
+
+The earlier general-carton evaluation remains reproducible from
 `eval/dataset/ground_truth.json`. Run the standard evaluator with:
 
 ```powershell
@@ -346,7 +361,7 @@ python eval/tune_onnx_thresholds.py
 python eval/analyze_count_risks.py
 ```
 
-Current reviewed ONNX results:
+Historical reviewed ONNX results:
 
 | Metric | Full set | Supported scenes |
 | --- | ---: | ---: |
@@ -473,8 +488,8 @@ local artifacts and must remain uncommitted.
   inflates conventional validation metrics.
 - The API has no authentication, secure evidence store, retention policy,
   monitoring service, WMS/POD integration, or review-feedback pipeline.
-- Manual iframe upload, cold-start, timeout, and backend-outage acceptance
-  checks remain before the final release.
+- Manual public-UI upload, cold-start, timeout, and backend-outage acceptance
+  checks were confirmed by the project owner on 2026-08-12.
 
 ## Documentation Map
 
@@ -482,11 +497,11 @@ local artifacts and must remain uncommitted.
 | --- | --- |
 | `CHANGELOG.md` | Milestones and differences from previous project stages |
 | `docs/model_decision.md` | Baseline experiments and model selection |
-| `docs/finetuning_findings.md` | Training, leakage, count, and runtime evidence |
-| `docs/production_inference_validation.md` | ONNX parity, threshold, memory, and live deployment evidence |
-| `docs/error_analysis.md` | Current reviewed metrics, mismatches, taxonomy, examples, and limitations |
+| `docs/finetuning_findings.md` | Historical general-model training and runtime evidence |
+| `docs/production_inference_validation.md` | Historical general-model ONNX and deployment evidence |
+| `docs/error_analysis.md` | Historical general-model mismatches and error taxonomy |
 | `docs/examples/README.md` | Curated annotated historical baseline overlays |
-| `docs/handoff_and_cleanup.md` | Supported workflow, cleanup policy, and release checklist |
+| `docs/truck_model_evaluation.md` | Truck-model training, external-test, parity, and acceptance evidence |
 
 ## Git and Contribution Workflow
 
@@ -508,13 +523,6 @@ evaluation artifact directories without an explicit reviewed exception.
 
 ## Next Milestone
 
-The next sprint priority is a Streamlit interface that:
-
-1. uploads and previews an image;
-2. calls the hosted FastAPI backend;
-3. displays annotated evidence, count, sizes, confidence, and review reasons;
-4. offers the structured result for download;
-5. handles Render cold starts, timeouts, and backend failures clearly.
-
-After frontend deployment and end-to-end acceptance testing, promote the stable
-`dev` state to `main` through a release pull request.
+The Streamlit interface and end-to-end acceptance flow are complete. The next
+release step is to run the final quality gate and promote the stable `dev` state
+to `main` through a reviewed pull request.

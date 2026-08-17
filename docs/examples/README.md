@@ -25,5 +25,5 @@ counts. Its memory footprint later exceeded the Render Free limit.
 
 ![YOLO-World baseline on a dense indoor stack](yolo_world_img_006.jpg)
 
-Current reviewed ONNX counts and limitations remain documented separately in
-`docs/error_analysis.md` and `docs/production_inference_validation.md`.
+Current truck-model results and limitations are documented separately in
+`docs/truck_model_evaluation.md`.

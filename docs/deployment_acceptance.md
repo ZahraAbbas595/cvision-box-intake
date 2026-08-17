@@ -42,10 +42,23 @@ in-app browser. The same two tracked files were therefore submitted directly
 to the configured live backend through `scripts/smoke_render.py`. A manual UI
 upload remains in the final browser acceptance checklist.
 
-## Remaining Acceptance Checks
+## Final Manual Acceptance
 
-- Upload both images manually through the public Streamlit interface.
-- Leave Render idle for at least 20 minutes and record the cold-start message
-  and elapsed time.
-- Exercise the visible timeout and unavailable-backend states without changing
-  the deployed secret permanently.
+The project owner confirmed completion of the remaining public-UI checks on
+2026-08-12: manual clear and difficult uploads, the cold-start experience, and
+the visible timeout/backend-unavailable handling.
+
+Recorded manual observations:
+
+| Check | Observed result |
+| --- | --- |
+| Cold backend | 27 seconds |
+| Cold-start progress message | “Waking up the service if needed and analyzing the image…” |
+| Warm analysis | 2 seconds |
+| Timeout state | “Analysis took too long. The service may still be waking up.” |
+| Backend-unavailable state | “The analysis service is not responding. Try again shortly.” |
+
+These messages were visible to the operator and clearly distinguished a slow
+cold start from an unavailable analysis service. The timings are manual browser
+observations; the earlier automated values above remain the reproducible server
+measurements.
