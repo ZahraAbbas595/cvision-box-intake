@@ -51,8 +51,10 @@ available.
 
 ### Changed
 
+- Aligned the root README with the truck-only counting scope, optional Gemini
+  review contract, current repository layout, CI commands, and staging gate.
 - Selected the truck-specific YOLOv8n checkpoint as the default local and
-  build-time model candidate while retaining the earlier checkpoint for rollback.
+  build-time model; Git history retains the earlier checkpoint for rollback.
 - Aligned candidate inference defaults at confidence `0.45` and IoU `0.30`.
 - Declared the ONNX exporter dependency required by the reproducible export
   script.
