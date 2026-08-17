@@ -10,6 +10,7 @@ from pathlib import Path
 
 import psutil
 import torch
+
 from ultralytics import YOLO
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -21,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--model",
         type=Path,
-        default=ROOT / "models" / "carton_yolov8n_best.pt",
+        default=ROOT / "models" / "carton_yolov8n_truck_best.pt",
     )
     parser.add_argument(
         "--images",

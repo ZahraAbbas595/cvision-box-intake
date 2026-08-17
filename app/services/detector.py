@@ -1,6 +1,5 @@
 """PyTorch and ONNX carton-detection backends and post-processing."""
 
-from pathlib import Path
 from typing import Protocol
 
 import cv2
@@ -11,9 +10,9 @@ from app.config import (
     INFERENCE_IMAGE_SIZE,
     IOU_THRESHOLD,
     MODEL_BACKEND,
+    MODEL_PATH,
 )
 
-MODEL_PATH = Path(__file__).resolve().parents[2] / "models" / "carton_yolov8n_best.pt"
 ONNX_MODEL_PATH = MODEL_PATH.with_suffix(".onnx")
 MODEL_STRIDE = 32
 
@@ -31,8 +30,11 @@ class PyTorchDetector:
 
     def __init__(self) -> None:
         import torch
+
         from ultralytics import YOLO
 
+        if not MODEL_PATH.is_file():
+            raise FileNotFoundError(f"PyTorch model not found at {MODEL_PATH}.")
         torch.set_num_threads(1)
         self._model = YOLO(MODEL_PATH)
         self._model.to("cpu")

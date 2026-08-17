@@ -7,9 +7,14 @@ __pycache__/
 models/*.pt
 models/*.onnx
 !models/carton_yolov8n_best.pt
+!models/carton_yolov8n_truck_best.pt
 eval/results/
 runs/
 /dataset/
+/dataset2/
+/external_test/
+/Ultralytics/
+/.ultralytics/
 response*.json
 .DS_Store
 .venv/
