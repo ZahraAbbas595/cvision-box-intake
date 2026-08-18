@@ -6,8 +6,16 @@ __pycache__/
 *.onnx
 models/*.pt
 models/*.onnx
-eval/results/
+!models/carton_yolov8n_truck_best.pt
+runs/
+/dataset/
+/dataset2/
+/external_test/
+/Ultralytics/
+/.ultralytics/
+response*.json
 .DS_Store
 .venv/
+.verify-venv/
 venv/
 *.egg-info/
