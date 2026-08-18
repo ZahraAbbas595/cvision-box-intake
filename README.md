@@ -232,9 +232,10 @@ the final visible count is exactly correct.
 
 When `VISUAL_REVIEW_ENABLED=true`, the service can additionally send the
 annotated image and limited detector metadata to the configured Gemini
-vision-language model. This assessment is advisory: it may add an allow-listed
-reason and concise operator guidance, but it cannot recount cartons, change
-bounding boxes, remove deterministic reasons, or provide a corrected count.
+vision-language model. This assessment is advisory: its observations remain in
+`review_assessment` and do not automatically require human review. It cannot
+recount cartons, change bounding boxes, alter deterministic reasons, or provide
+a corrected count.
 
 | Gemini reason | Visual concern |
 | --- | --- |

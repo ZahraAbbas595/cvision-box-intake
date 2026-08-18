@@ -260,7 +260,7 @@ def test_infer_flags_possible_fragmented_detections(client: TestClient) -> None:
     assert "possible_fragmented_detections" in body["review_reasons"]
 
 
-def test_infer_adds_visual_review_reason_without_changing_count(
+def test_infer_keeps_visual_review_advisory_without_changing_count(
     client: TestClient,
 ) -> None:
     image = np.full((100, 100, 3), 255, dtype=np.uint8)
@@ -292,8 +292,8 @@ def test_infer_adds_visual_review_reason_without_changing_count(
     body = response.json()
     assert response.status_code == 200
     assert body["visible_box_count"] == 1
-    assert body["human_review_required"] is True
-    assert body["review_reasons"] == ["reflection_or_shadow"]
+    assert body["human_review_required"] is False
+    assert body["review_reasons"] == []
     assert body["review_assessment"] == assessment
 
 
@@ -326,7 +326,8 @@ def test_infer_routes_and_logs_novel_visual_risk(client: TestClient) -> None:
 
     body = response.json()
     assert body["human_review_required"] is True
-    assert body["review_reasons"] == ["no_boxes_detected", "other_visual_risk"]
+    assert body["review_reasons"] == ["no_boxes_detected"]
+    assert body["review_assessment"]["visual_risk_reasons"] == ["other_visual_risk"]
     log_payload = json.loads(warning.call_args.args[1])
     assert log_payload["event"] == "novel_visual_risk_detected"
     assert log_payload["request_id"] == body["request_id"]
