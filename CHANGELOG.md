@@ -13,6 +13,8 @@ available.
 
 - Replaced weakest-box operational confidence with average accepted-detection
   confidence and clarified its operator-facing label and contract.
+- Made optional Gemini visual observations advisory-only so speculative visual
+  concerns do not automatically route otherwise clean results to human review.
 
 ### Removed
 

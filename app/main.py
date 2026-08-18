@@ -232,9 +232,6 @@ async def infer(response: Response, file: UploadFile = File(...)) -> dict:
             model=VISUAL_REVIEW_MODEL,
             timeout_seconds=VISUAL_REVIEW_TIMEOUT_SECONDS,
         )
-        for reason in review_assessment["visual_risk_reasons"]:
-            if reason not in review_reasons:
-                review_reasons.append(reason)
         if review_assessment["novel_reason"]:
             logger.warning(
                 "%s",
