@@ -17,6 +17,8 @@ available.
   concerns do not automatically route otherwise clean results to human review.
 - Aligned count evaluation with deployed confidence and IoU settings and added
   exact, overcount, and undercount example reporting.
+- Replaced Streamlit's deprecated `use_container_width` image option with the
+  supported stretch-width API.
 
 ### Added
 
