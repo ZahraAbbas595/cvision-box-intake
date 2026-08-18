@@ -25,7 +25,6 @@ from app.config import (
     FRAGMENT_MAX_IOU,
     FRAGMENT_MIN_AXIS_OVERLAP,
     FRAGMENT_MIN_PAIRS,
-    HIGH_DETECTION_COUNT,
     IOU_THRESHOLD,
     LOW_CONFIDENCE_THRESHOLD,
     MAX_UPLOAD_BYTES,
@@ -170,8 +169,6 @@ async def infer(response: Response, file: UploadFile = File(...)) -> dict:
     edge_count = sum(1 for detection in detection_list if detection["touches_edge"])
     if len(detection_list) > 0 and edge_count / len(detection_list) > EDGE_REVIEW_RATIO:
         review_reasons.append("boxes_cut_off_at_edge")
-    if len(detection_list) >= HIGH_DETECTION_COUNT:
-        review_reasons.append("high_detection_count")
     suspicious_pairs = []
     if len(detection_list) <= FRAGMENT_MAX_DETECTIONS:
         suspicious_pairs = find_suspicious_fragment_pairs(
@@ -189,20 +186,11 @@ async def infer(response: Response, file: UploadFile = File(...)) -> dict:
     if len(detection_list) == 0:
         confidence_score = 0.0
     else:
-        base = min(detection["confidence"] for detection in detection_list)
-        penalties = (
-            0.15
-            if any(
-                detection["confidence"] < LOW_CONFIDENCE_THRESHOLD
-                for detection in detection_list
-            )
-            else 0.0
+        confidence_score = round(
+            sum(detection["confidence"] for detection in detection_list)
+            / len(detection_list),
+            2,
         )
-        if quality_flags:
-            penalties += 0.15
-        if edge_count / len(detection_list) > EDGE_REVIEW_RATIO:
-            penalties += 0.05
-        confidence_score = round(max(base - penalties, 0.05), 2)
 
     annotated = image.copy()
     for detection in detection_list:
