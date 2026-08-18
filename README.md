@@ -413,6 +413,12 @@ parity, and manual acceptance evidence.
 
 The current rationale is documented in `docs/model_decision.md`.
 
+Operational count evaluation at the deployed thresholds produced 27.6%
+exact-count accuracy and 14.41 mean absolute error. See
+`docs/error_analysis.md` for per-source overcount/undercount results and three
+annotated examples. These results are the primary evidence for count reliability;
+mAP alone is not an operational count guarantee.
+
 ## Training and Reproducibility
 
 The selected model is already committed. Retraining is not required to run the
@@ -515,6 +521,10 @@ local artifacts and must remain uncommitted.
 | `CHANGELOG.md` | Milestones and differences from previous project stages |
 | `docs/model_decision.md` | Current model choice and rejected alternatives |
 | `docs/truck_model_evaluation.md` | Truck-model training, external-test, parity, and acceptance evidence |
+| `docs/error_analysis.md` | Exact-count, MAE, overcount, undercount, and annotated failure evidence |
+| `docs/case_study.md` | Draft CVision R&D case study and production-readiness assessment |
+| `docs/demo_script.md` | Five-minute public prototype demonstration script |
+| `docs/sprint_completion.md` | Sprint requirement-to-evidence checklist and owner sign-off items |
 
 ## Git and Contribution Workflow
 
@@ -536,8 +546,8 @@ evaluation artifact directories without an explicit reviewed exception.
 
 ## Next Milestone
 
-Development and staging CI, Render ONNX deployment, memory headroom, API
-inference, and Streamlit truck-image smoke checks are complete. The next release
-step is staging sign-off and a reviewed pull request from `stage` to `main`.
-Gemini can remain disabled for that promotion; if it is required, configure and
-verify the secret in staging before enabling the same optional feature on main.
+The technical sprint scope is complete and deployed. Remaining closure is
+stakeholder-owned acceptance: run `docs/demo_script.md` with clear and difficult
+images, confirm the public links from an unauthenticated browser, and record
+formal sign-off. Any work after that belongs to a separately scoped warehouse
+pilot rather than this research sprint.
