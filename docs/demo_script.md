@@ -14,12 +14,9 @@ Target length: five minutes.
 5. Upload a difficult image. Show how blur, exposure, edge cutoff, no detection,
    or suspected fragmentation can require review. Explain that optional Gemini
    observations are advisory and cannot change the count or force review.
-6. Show the exact, overcount, and undercount examples in
-   `docs/error_analysis.md`. Explain that dense stacks remain the dominant
-   undercount risk and that the technical appendix preserves the full metrics.
-7. Open `/health`, `/version`, and the API docs to demonstrate the separately
+6. Open `/health`, `/version`, and the API docs to demonstrate the separately
    hosted FastAPI service and explain that Streamlit calls it using an encrypted
    `BACKEND_URL` setting.
-8. Close with the main limitation: very dense or occluded loads need closer or
+7. Close with the main limitation: very dense or occluded loads need closer or
    multiple images, warehouse-specific validation, and barcode/manifest
    confirmation.

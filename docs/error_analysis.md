@@ -21,7 +21,7 @@ error directly, even when high-level detection metrics look strong.
 
 ### Exact count: 61 expected, 61 predicted
 
-![Exact-count example](annotated_examples/example-1.jpg)
+![Exact-count example](./annotated_examples/example-1.jpg)
 
 The regular front-facing stack has clear carton boundaries. This is the target
 operating pattern and demonstrates that a dense image does not require review
@@ -29,7 +29,7 @@ merely because it contains many cartons.
 
 ### Overcount: 74 expected, 94 predicted
 
-![Overcount example](annotated_examples/example-2.jpg)
+![Overcount example](./annotated_examples/example-2.jpg)
 
 Thin side faces and tightly adjacent boundaries create duplicate or fragmented
 regions. The likely operational effect is accepting more cartons than are
@@ -38,7 +38,7 @@ it cannot reliably repair a count and therefore only provides review evidence.
 
 ### Undercount: 310 expected, 136 predicted
 
-![Undercount example](annotated_examples/example-3.jpg)
+![Undercount example](./annotated_examples/example-3.jpg)
 
 Very small cartons in the lower and distant parts of the stack fall below the
 detector's reliable resolution and confidence. This is the dominant high-impact

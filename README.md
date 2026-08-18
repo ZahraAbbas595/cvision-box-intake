@@ -522,7 +522,6 @@ local artifacts and must remain uncommitted.
 | `docs/error_analysis.md` | Exact-count, MAE, overcount, undercount, and annotated failure evidence |
 | `docs/case_study.md` | Draft CVision R&D case study and production-readiness assessment |
 | `docs/demo_script.md` | Five-minute public prototype demonstration script |
-| `docs/sprint_completion.md` | Sprint requirement-to-evidence checklist and owner sign-off items |
 
 ## Git and Contribution Workflow
 

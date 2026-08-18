@@ -23,11 +23,12 @@ available.
 ### Added
 
 - Final sprint handoff artifacts: operational error analysis with three
-  annotated examples, draft R&D case study, demonstration script, and
-  requirement-to-evidence completion checklist.
+  annotated examples, draft R&D case study, and demonstration script.
 
 ### Removed
 
+- Removed the redundant sprint-completion checklist; required handoff evidence
+  remains in the README and dedicated technical documents.
 - Removed automatic human-review routing based only on detecting 12 or more
   cartons, because high carton counts are normal in the truck-intake workflow.
 
