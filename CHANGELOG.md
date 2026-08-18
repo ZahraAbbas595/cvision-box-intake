@@ -15,6 +15,14 @@ available.
   confidence and clarified its operator-facing label and contract.
 - Made optional Gemini visual observations advisory-only so speculative visual
   concerns do not automatically route otherwise clean results to human review.
+- Aligned count evaluation with deployed confidence and IoU settings and added
+  exact, overcount, and undercount example reporting.
+
+### Added
+
+- Final sprint handoff artifacts: operational error analysis with three
+  annotated examples, draft R&D case study, demonstration script, and
+  requirement-to-evidence completion checklist.
 
 ### Removed
 

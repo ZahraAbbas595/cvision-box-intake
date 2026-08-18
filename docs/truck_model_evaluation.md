@@ -25,6 +25,11 @@ image overlap against the fine-tuning train or validation splits.
 | mAP50 | 0.890 |
 | mAP50-95 | 0.667 |
 
+At the deployed confidence `0.45` and IoU `0.30`, operational count evaluation
+produced 27.6% exact-count accuracy and mean absolute error 14.41. Of 105 images,
+29 were exact, 28 overcounted, and 48 undercounted. See
+`docs/error_analysis.md` for per-source results and annotated examples.
+
 The external datasets remain excluded from training and threshold tuning.
 
 ## Manual Acceptance
