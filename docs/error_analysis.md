@@ -13,9 +13,9 @@ and a maximum of 300 detections.
 | Boxintake | 56 | 5,570 | 4,307 | 8.9% | 25.27 | 19 | 32 |
 | Carton loading | 49 | 2,537 | 2,497 | 49.0% | 2.00 | 9 | 16 |
 
-The totals include 29 exact images, 28 overcounts, and 48 undercounts. Exact
-count is deliberately reported alongside precision, recall, and mAP because a
-warehouse operator experiences count error directly.
+The totals include 29 exact images, 28 overcounts, and 48 undercounts. The full
+technical result remains here because a warehouse operator experiences count
+error directly, even when high-level detection metrics look strong.
 
 ## Annotated examples
 

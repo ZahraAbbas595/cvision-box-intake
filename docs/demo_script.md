@@ -15,8 +15,8 @@ Target length: five minutes.
    or suspected fragmentation can require review. Explain that optional Gemini
    observations are advisory and cannot change the count or force review.
 6. Show the exact, overcount, and undercount examples in
-   `docs/error_analysis.md`. State the locked results: 27.6% exact-count accuracy
-   and 14.41 MAE on 105 difficult external images.
+   `docs/error_analysis.md`. Explain that dense stacks remain the dominant
+   undercount risk and that the technical appendix preserves the full metrics.
 7. Open `/health`, `/version`, and the API docs to demonstrate the separately
    hosted FastAPI service and explain that Streamlit calls it using an encrypted
    `BACKEND_URL` setting.

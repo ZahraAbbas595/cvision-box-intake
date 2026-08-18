@@ -18,7 +18,6 @@ truck-load counting or a production deployment claim.
 | Current project and service version | `0.9.0` |
 | Locked truck evaluation set | 105 images, 8,107 cartons |
 | External precision / recall | 89.9% / 84.7% |
-| External mAP50 / mAP50-95 | 89.0% / 66.7% |
 | Highest observed Render peak RSS | 426.4 MB of 512 MB |
 | Human-review routing | Deterministic rules plus optional advisory Gemini review; never changes counts automatically |
 | Streamlit frontend | Deployed on Streamlit Community Cloud |
@@ -397,8 +396,8 @@ CI runs on pull requests and pushes to `dev`, `stage`, or `main` using Python 3.
 ## Truck-Scope Evaluation
 
 The locked external truck test set contains 105 images and 8,107 annotated
-cartons. The `ft-truck-v1` candidate achieved precision `0.899`, recall `0.847`,
-mAP50 `0.890`, and mAP50-95 `0.667`. See
+cartons. The `ft-truck-v1` candidate achieved precision `0.899` and recall
+`0.847`. See
 `docs/truck_model_evaluation.md` for provenance, label normalization, ONNX
 parity, and manual acceptance evidence.
 
@@ -413,11 +412,10 @@ parity, and manual acceptance evidence.
 
 The current rationale is documented in `docs/model_decision.md`.
 
-Operational count evaluation at the deployed thresholds produced 27.6%
-exact-count accuracy and 14.41 mean absolute error. See
-`docs/error_analysis.md` for per-source overcount/undercount results and three
-annotated examples. These results are the primary evidence for count reliability;
-mAP alone is not an operational count guarantee.
+Operational count evaluation is documented in `docs/error_analysis.md` with
+per-source overcount/undercount results and three annotated examples. Those
+results, rather than a single model metric, are the primary evidence for count
+reliability.
 
 ## Training and Reproducibility
 

@@ -22,9 +22,9 @@ Gemini observations remain advisory and cannot change counts or force review.
 - Public UI and separately hosted API are accessible outside localhost.
 - The locked external set contains 105 images and 8,107 cartons with no exact
   overlap against the fine-tuning train or validation splits.
-- External object metrics are precision 89.9%, recall 84.7%, mAP50 89.0%, and
-  mAP50-95 66.7%.
-- Operational count metrics are 27.6% exact-count accuracy and 14.41 MAE.
+- External evaluation achieved precision 89.9% and recall 84.7%.
+- Operational count evaluation records exact, overcount, and undercount outcomes
+  with representative annotated examples in the technical error analysis.
 - ONNX and PyTorch accepted counts match on all 105 external images.
 - Automated validation covers upload failures, review rules, visual-review
   failure safety, frontend response validation, and runtime telemetry.
@@ -35,8 +35,8 @@ The system is useful as a transparent research prototype, especially on
 front-facing stacks with clear boundaries. It is not reliable enough to replace
 barcode confirmation or a manifest. Dense scenes with hundreds of small cartons
 can undercount severely, while repeated edges and side faces can overcount. The
-gap between strong mAP and modest exact-count accuracy demonstrates why model
-confidence and detection metrics are not substitutes for operational trust.
+gap between strong detection metrics and observed count failures demonstrates
+why model confidence is not a substitute for operational trust.
 
 ## Operational value demonstrated
 
