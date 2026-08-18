@@ -15,7 +15,7 @@ truck-load counting or a production deployment claim.
 | FastAPI backend | Implemented and deployed on Render Free |
 | Production inference | ONNX Runtime on CPU |
 | Development inference | Fine-tuned YOLOv8n through PyTorch |
-| Current project and service version | `0.8.0` |
+| Current project and service version | `0.9.0` |
 | Locked truck evaluation set | 105 images, 8,107 cartons |
 | External precision / recall | 89.9% / 84.7% |
 | External mAP50 / mAP50-95 | 89.0% / 66.7% |
@@ -196,7 +196,7 @@ curl.exe -X POST "http://127.0.0.1:8000/v1/box-intake/infer" `
     "backend": "onnx"
   },
   "service": {
-    "version": "0.8.0"
+    "version": "0.9.0"
   },
   "runtime_memory": {
     "current_rss_mb": 169.4,

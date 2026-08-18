@@ -9,6 +9,8 @@ available.
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-08-18
+
 ### Added
 
 - Separate free-tier staging deployments for the FastAPI backend and Streamlit
