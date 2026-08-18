@@ -11,6 +11,9 @@ available.
 
 ### Added
 
+- Separate free-tier staging deployments for the FastAPI backend and Streamlit
+  frontend, connected to the `stage` branch and verified with API and browser
+  upload smoke tests.
 - Environment-configurable model paths and identity metadata for safely testing
   candidate checkpoints without replacing the production model.
 - A reproducible external truck-carton test-set builder that combines Roboflow
@@ -51,6 +54,9 @@ available.
 
 ### Changed
 
+- Advanced the release gate from `dev` to `stage`; promotion to `main` now
+  requires staging sign-off. Optional Gemini review remains disabled in staging
+  until its secret is configured and verified there.
 - Aligned the root README with the truck-only counting scope, optional Gemini
   review contract, current repository layout, CI commands, and staging gate.
 - Selected the truck-specific YOLOv8n checkpoint as the default local and
