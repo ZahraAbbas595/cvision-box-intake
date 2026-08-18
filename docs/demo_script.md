@@ -23,4 +23,3 @@ Target length: five minutes.
 8. Close with the main limitation: very dense or occluded loads need closer or
    multiple images, warehouse-specific validation, and barcode/manifest
    confirmation.
-

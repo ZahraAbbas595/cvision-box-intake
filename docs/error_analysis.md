@@ -65,4 +65,3 @@ python scripts/evaluate_external_counts.py `
   --confidence 0.45 `
   --iou 0.30
 ```
-

@@ -29,4 +29,3 @@ owner should run the demonstration script with at least one clear and one
 difficult image, confirm the public links from an unauthenticated browser, and
 record approval from the named sprint sign-off contact. Those are governance
 actions, not missing code.
-

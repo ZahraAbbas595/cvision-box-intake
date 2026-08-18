@@ -52,4 +52,3 @@ validation, multi-view or tiled inference for dense loads, calibrated physical
 measurement, authentication, secure evidence storage, monitoring, retention
 rules, WMS/POD/DANI integration, and a feedback process based on confirmed
 operator review outcomes.
-
