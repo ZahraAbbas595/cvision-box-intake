@@ -221,13 +221,14 @@ Deterministic signals always run locally and remain authoritative for routing:
 | `no_boxes_detected` | Accepted count is zero | The model found no usable carton evidence |
 | `low_confidence_detection` | Any accepted detection is below `0.45` | At least one detection is weak |
 | `boxes_cut_off_at_edge` | More than 20% touch the frame | Border truncation may hide carton extent |
-| `high_detection_count` | At least 12 detections | Crowded geometry increases count risk |
 | `possible_fragmented_detections` | Adjacent aligned regions meet conservative geometry rules | One carton may have produced separate regions |
 | `poor_image_quality` | Resolution, blur, or exposure flag fires | The visual evidence itself is weak |
 
 Image-quality flags are `low_resolution`, `possible_blur`, `underexposed`, and
-`overexposed`. They apply a review-only confidence penalty and never alter
-detections.
+`overexposed`. They require review but never alter detections or their reported
+average confidence. The `confidence_score` is the arithmetic mean of accepted
+detection confidences; it describes detector certainty, not the probability that
+the final visible count is exactly correct.
 
 When `VISUAL_REVIEW_ENABLED=true`, the service can additionally send the
 annotated image and limited detector metadata to the configured Gemini
@@ -352,7 +353,6 @@ model paths resolve from the repository root.
 | `LOW_CONFIDENCE_THRESHOLD` | `0.45` | Review threshold for accepted detections |
 | `EDGE_MARGIN_PX` | `5` | Pixel margin used to identify edge contact |
 | `EDGE_REVIEW_RATIO` | `0.20` | Edge-contact fraction that triggers review |
-| `HIGH_DETECTION_COUNT` | `12` | Crowded-scene review threshold |
 | `MIN_IMAGE_DIMENSION` | `200` | Minimum image width or height |
 | `BLUR_VARIANCE_THRESHOLD` | `50.0` | Minimum Laplacian variance |
 | `DARK_MEAN_THRESHOLD` | `40.0` | Underexposure threshold |

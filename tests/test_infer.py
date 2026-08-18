@@ -165,7 +165,7 @@ def test_infer_flags_edge_truncation(client: TestClient) -> None:
     assert "boxes_cut_off_at_edge" in response.json()["review_reasons"]
 
 
-def test_infer_flags_high_detection_count(client: TestClient) -> None:
+def test_infer_does_not_flag_expected_high_detection_count(client: TestClient) -> None:
     image = np.full((200, 200, 3), 255, dtype=np.uint8)
     encoded, buffer = cv2.imencode(".jpg", image)
     assert encoded
@@ -177,7 +177,10 @@ def test_infer_flags_high_detection_count(client: TestClient) -> None:
         for index in range(12)
     ]
 
-    with patch("app.main.run_inference", return_value=detections):
+    with (
+        patch("app.main.assess_image_quality", return_value=[]),
+        patch("app.main.run_inference", return_value=detections),
+    ):
         response = client.post(
             "/v1/box-intake/infer",
             files={"file": ("boxes.jpg", buffer.tobytes(), "image/jpeg")},
@@ -186,7 +189,31 @@ def test_infer_flags_high_detection_count(client: TestClient) -> None:
     assert response.status_code == 200
     body = response.json()
     assert body["visible_box_count"] == 12
-    assert "high_detection_count" in body["review_reasons"]
+    assert body["human_review_required"] is False
+    assert "high_detection_count" not in body["review_reasons"]
+
+
+def test_infer_reports_average_detection_confidence(client: TestClient) -> None:
+    image = np.full((200, 200, 3), 128, dtype=np.uint8)
+    encoded, buffer = cv2.imencode(".jpg", image)
+    assert encoded
+    detections = [
+        {"bbox_xyxy": [10, 10, 40, 40], "confidence": 0.58},
+        {"bbox_xyxy": [60, 10, 90, 40], "confidence": 0.92},
+        {"bbox_xyxy": [110, 10, 140, 40], "confidence": 0.90},
+    ]
+
+    with (
+        patch("app.main.assess_image_quality", return_value=[]),
+        patch("app.main.run_inference", return_value=detections),
+    ):
+        response = client.post(
+            "/v1/box-intake/infer",
+            files={"file": ("boxes.jpg", buffer.tobytes(), "image/jpeg")},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["confidence_score"] == 0.8
 
 
 def test_infer_routes_poor_image_quality_to_review(client: TestClient) -> None:
@@ -209,7 +236,7 @@ def test_infer_routes_poor_image_quality_to_review(client: TestClient) -> None:
     assert body["image"]["quality_flags"] == ["possible_blur"]
     assert body["human_review_required"] is True
     assert "poor_image_quality" in body["review_reasons"]
-    assert body["confidence_score"] == 0.75
+    assert body["confidence_score"] == 0.9
 
 
 def test_infer_flags_possible_fragmented_detections(client: TestClient) -> None:
