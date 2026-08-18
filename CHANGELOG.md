@@ -9,6 +9,16 @@ available.
 
 ## [Unreleased]
 
+### Changed
+
+- Replaced weakest-box operational confidence with average accepted-detection
+  confidence and clarified its operator-facing label and contract.
+
+### Removed
+
+- Removed automatic human-review routing based only on detecting 12 or more
+  cartons, because high carton counts are normal in the truck-intake workflow.
+
 ## [0.9.0] - 2026-08-18
 
 ### Added

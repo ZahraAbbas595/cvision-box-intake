@@ -78,7 +78,9 @@ def render_result(result: dict[str, Any], original_bytes: bytes) -> None:
 
     count_col, confidence_col, review_col = st.columns(3)
     count_col.metric("Visible boxes", int(result["visible_box_count"]))
-    confidence_col.metric("Operational confidence", f"{result['confidence_score']:.0%}")
+    confidence_col.metric(
+        "Average detection confidence", f"{result['confidence_score']:.0%}"
+    )
     review_required = bool(result["human_review_required"])
     review_col.metric("Human review", "Required" if review_required else "Not required")
 
