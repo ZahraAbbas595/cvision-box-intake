@@ -10,9 +10,6 @@ REVIEW_REASON_MESSAGES = {
     "boxes_cut_off_at_edge": (
         "Some boxes are cut off by the image edge and may not be fully visible."
     ),
-    "high_detection_count": (
-        "This is a crowded scene, so the visible count should be checked."
-    ),
     "possible_fragmented_detections": (
         "One box may have been split into multiple detected regions."
     ),
