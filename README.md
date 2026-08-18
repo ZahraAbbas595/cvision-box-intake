@@ -22,6 +22,7 @@ truck-load counting or a production deployment claim.
 | Highest observed Render peak RSS | 426.4 MB of 512 MB |
 | Human-review routing | Deterministic rules plus optional advisory Gemini review; never changes counts automatically |
 | Streamlit frontend | Deployed on Streamlit Community Cloud |
+| Staging environment | Separate free-tier Render and Streamlit deployments from `stage`; smoke tested end to end |
 | Production readiness | Research prototype only |
 
 ### Live Backend
@@ -38,6 +39,20 @@ truck-load counting or a production deployment claim.
 The frontend deploys from `dev` and reads the Render URL from an encrypted
 Streamlit secret. Manual truck-image acceptance is recorded in
 `docs/truck_model_evaluation.md`.
+
+### Staging Environment
+
+- API root: <https://cvision-box-intake-api-stage.onrender.com>
+- Health: <https://cvision-box-intake-api-stage.onrender.com/health>
+- Version: <https://cvision-box-intake-api-stage.onrender.com/version>
+- Streamlit: <https://cvision-box-intake-stage.streamlit.app/>
+
+Both staging services deploy from `stage` and use free hosting. The staging API
+uses ONNX Runtime within Render's 512 MB limit, and the Streamlit app reads its
+API URL from an encrypted secret. API and browser upload smoke checks passed on
+2026-08-18. Advisory Gemini review remains disabled in staging until its API key
+is added to the staging secret store and verified there; deterministic review
+signals remain active.
 
 Operators can either select a JPEG/PNG file or capture a new photo using the
 device camera. When the backend flags blur, poor exposure, or low resolution,
@@ -520,7 +535,8 @@ evaluation artifact directories without an explicit reviewed exception.
 
 ## Next Milestone
 
-Development CI, Render ONNX deployment, memory headroom, API inference, Gemini
-review, and Streamlit truck-image smoke checks are complete. The next release
-step is a reviewed pull request from `dev` to `stage`, followed by staging smoke
-checks. Promotion from `stage` to `main` remains a separate approval gate.
+Development and staging CI, Render ONNX deployment, memory headroom, API
+inference, and Streamlit truck-image smoke checks are complete. The next release
+step is staging sign-off and a reviewed pull request from `stage` to `main`.
+Gemini can remain disabled for that promotion; if it is required, configure and
+verify the secret in staging before enabling the same optional feature on main.
