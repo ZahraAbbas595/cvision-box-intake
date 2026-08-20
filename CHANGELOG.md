@@ -9,6 +9,8 @@ available.
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-08-20
+
 ### Changed
 
 - Replaced weakest-box operational confidence with average accepted-detection
