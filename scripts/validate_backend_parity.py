@@ -21,7 +21,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--images",
         type=Path,
-        default=ROOT / "external_test/combined/images",
+        default=ROOT / "external_test/carton_loading_evaluation/images",
     )
     parser.add_argument(
         "--report",
