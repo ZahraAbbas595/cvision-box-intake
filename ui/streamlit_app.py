@@ -117,10 +117,10 @@ def render_result(result: dict[str, Any], original_bytes: bytes) -> None:
     original_col, annotated_col = st.columns(2, gap="medium")
     with original_col:
         st.caption("Original")
-        st.image(original_bytes, use_container_width=True)
+        st.image(original_bytes, width="stretch")
     with annotated_col:
         st.caption("Annotated evidence")
-        st.image(annotated_bytes, use_container_width=True)
+        st.image(annotated_bytes, width="stretch")
 
     summary = result["size_summary"]
     st.subheader("Image-relative size summary")

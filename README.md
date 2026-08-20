@@ -16,9 +16,8 @@ truck-load counting or a production deployment claim.
 | Production inference | ONNX Runtime on CPU |
 | Development inference | Fine-tuned YOLOv8n through PyTorch |
 | Current project and service version | `0.9.0` |
-| Locked truck evaluation set | 105 images, 8,107 cartons |
-| External precision / recall | 89.9% / 84.7% |
-| External mAP50 / mAP50-95 | 89.0% / 66.7% |
+| Carton Loading evaluation set | 49 images, 2,537 cartons |
+| Box precision / recall | 97.9% / 96.1% |
 | Highest observed Render peak RSS | 426.4 MB of 512 MB |
 | Human-review routing | Deterministic rules plus optional advisory Gemini review; never changes counts automatically |
 | Streamlit frontend | Deployed on Streamlit Community Cloud |
@@ -396,9 +395,9 @@ CI runs on pull requests and pushes to `dev`, `stage`, or `main` using Python 3.
 
 ## Truck-Scope Evaluation
 
-The locked external truck test set contains 105 images and 8,107 annotated
-cartons. The `ft-truck-v1` candidate achieved precision `0.899`, recall `0.847`,
-mAP50 `0.890`, and mAP50-95 `0.667`. See
+The locked Carton Loading evaluation set contains 49 images and 2,537 annotated
+cartons. The `ft-truck-v1` candidate achieved box precision `0.979` and box
+recall `0.961`. See
 `docs/truck_model_evaluation.md` for provenance, label normalization, ONNX
 parity, and manual acceptance evidence.
 
@@ -412,6 +411,11 @@ parity, and manual acceptance evidence.
    inside trucks and uses dynamic-shape ONNX in deployment.
 
 The current rationale is documented in `docs/model_decision.md`.
+
+Operational count evaluation is documented in `docs/error_analysis.md` with
+overcount/undercount results and three annotated examples. Those
+results, rather than a single model metric, are the primary evidence for count
+reliability.
 
 ## Training and Reproducibility
 
@@ -515,6 +519,9 @@ local artifacts and must remain uncommitted.
 | `CHANGELOG.md` | Milestones and differences from previous project stages |
 | `docs/model_decision.md` | Current model choice and rejected alternatives |
 | `docs/truck_model_evaluation.md` | Truck-model training, external-test, parity, and acceptance evidence |
+| `docs/error_analysis.md` | Exact-count, MAE, overcount, undercount, and annotated failure evidence |
+| `docs/case_study.md` | Draft CVision R&D case study and production-readiness assessment |
+| `docs/demo_script.md` | Five-minute public prototype demonstration script |
 
 ## Git and Contribution Workflow
 
@@ -536,8 +543,8 @@ evaluation artifact directories without an explicit reviewed exception.
 
 ## Next Milestone
 
-Development and staging CI, Render ONNX deployment, memory headroom, API
-inference, and Streamlit truck-image smoke checks are complete. The next release
-step is staging sign-off and a reviewed pull request from `stage` to `main`.
-Gemini can remain disabled for that promotion; if it is required, configure and
-verify the secret in staging before enabling the same optional feature on main.
+The technical sprint scope is complete and deployed. Remaining closure is
+stakeholder-owned acceptance: run `docs/demo_script.md` with clear and difficult
+images, confirm the public links from an unauthenticated browser, and record
+formal sign-off. Any work after that belongs to a separately scoped warehouse
+pilot rather than this research sprint.

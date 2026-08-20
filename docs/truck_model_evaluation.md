@@ -14,18 +14,33 @@ validation precision `0.9976`, recall `0.9877`, mAP50 `0.9945`, and mAP50-95
 
 ## Locked External Test
 
-Two independent Roboflow truck datasets were normalized into one `Box` class.
-The locked set contains 105 images and 8,107 carton instances, with no exact
-image overlap against the fine-tuning train or validation splits.
+The final operational evaluation uses the Carton Loading dataset normalized to
+one `Box` class. The locked set contains 49 images and 2,537 carton instances,
+with no exact image overlap against the fine-tuning train or validation splits.
 
 | Metric | Result |
 | --- | ---: |
-| Precision | 0.899 |
-| Recall | 0.847 |
-| mAP50 | 0.890 |
-| mAP50-95 | 0.667 |
+| Box precision | 0.979 |
+| Box recall | 0.961 |
+| mAP50 | 0.963 |
+| mAP50-95 | 0.843 |
 
-The external datasets remain excluded from training and threshold tuning.
+Operational count outcomes are kept in the technical
+`docs/error_analysis.md` appendix with their methodology, limitations,
+count-tolerance results, and annotated examples. They are not presented as a
+headline product-accuracy claim.
+
+The evaluation dataset remains excluded from training and threshold tuning.
+
+The box-level result is reproducible with:
+
+```powershell
+python scripts/evaluate_external_detection.py `
+  --model models/carton_yolov8n_truck_best.pt `
+  --data external_test/carton_loading_evaluation/data.yaml `
+  --confidence 0.45 `
+  --iou 0.30
+```
 
 ## Manual Acceptance
 
@@ -37,9 +52,9 @@ from the locked quantitative metrics.
 ## ONNX Parity
 
 The dynamic opset-17 ONNX export was exercised through the application's ONNX
-backend on all 105 locked external images. At confidence `0.45` and IoU `0.30`,
-its accepted carton count matched the PyTorch backend on every image: 105 of
-105 matched, with zero count mismatches.
+backend on all 49 locked evaluation images. At confidence `0.45` and IoU `0.30`,
+its accepted carton count matched the PyTorch backend on every image: 49 of 49
+matched, with zero count mismatches.
 
 ## Candidate Configuration
 

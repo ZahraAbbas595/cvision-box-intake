@@ -1,4 +1,4 @@
-"""Build a normalized external truck-carton test set from Roboflow exports."""
+"""Build the normalized Carton Loading external evaluation set."""
 
 from __future__ import annotations
 
@@ -28,7 +28,9 @@ def parse_args() -> argparse.Namespace:
         "--root", type=Path, default=ROOT / "external_test", help="Export root"
     )
     parser.add_argument(
-        "--output", type=Path, default=ROOT / "external_test" / "combined"
+        "--output",
+        type=Path,
+        default=ROOT / "external_test" / "carton_loading_evaluation",
     )
     return parser.parse_args()
 
@@ -117,7 +119,7 @@ def build_dataset(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
     )
     (output / "data.yaml").write_text(
-        "path: external_test/combined\n"
+        "path: external_test/carton_loading_evaluation\n"
         "train: images\n"
         "val: images\n"
         "nc: 1\n"
@@ -131,7 +133,6 @@ def main() -> None:
     """Build the normalized external evaluation dataset."""
     args = parse_args()
     sources = (
-        DatasetSource("boxintake", args.root / "boxintake", frozenset({1, 4})),
         DatasetSource("carton_loading", args.root / "carton_loading", frozenset({0})),
     )
     print(json.dumps(build_dataset(sources, args.output), indent=2))
