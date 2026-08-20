@@ -17,17 +17,20 @@ available.
   concerns do not automatically route otherwise clean results to human review.
 - Aligned count evaluation with deployed confidence and IoU settings and added
   exact, overcount, and undercount example reporting.
+- Scoped final evaluation evidence to the 49-image Carton Loading dataset and
+  separated box-level detection metrics from image-level count tolerance.
 - Replaced Streamlit's deprecated `use_container_width` image option with the
   supported stretch-width API.
 
 ### Added
 
 - Final sprint handoff artifacts: operational error analysis with three
-  annotated examples, draft R&D case study, demonstration script, and
-  requirement-to-evidence completion checklist.
+  annotated examples, draft R&D case study, and demonstration script.
 
 ### Removed
 
+- Removed the redundant sprint-completion checklist; required handoff evidence
+  remains in the README and dedicated technical documents.
 - Removed automatic human-review routing based only on detecting 12 or more
   cartons, because high carton counts are normal in the truck-intake workflow.
 
@@ -42,7 +45,7 @@ available.
   candidate checkpoints without replacing the production model.
 - A reproducible external truck-carton test-set builder that combines Roboflow
   splits, prevents filename collisions, and normalizes source labels to `Box`.
-- Per-source external evaluation of exact carton counts and mean absolute error.
+- External evaluation of exact carton counts and mean absolute error.
 - An application-level PyTorch/ONNX count-parity gate for candidate models.
 
 - An opt-in, fail-safe vision reviewer that can add allow-listed visual-risk
