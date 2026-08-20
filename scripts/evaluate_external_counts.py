@@ -20,6 +20,8 @@ class CountMetrics:
     predicted: int = 0
     absolute_error: int = 0
     exact: int = 0
+    within_one: int = 0
+    within_two: int = 0
     overcounted: int = 0
     undercounted: int = 0
 
@@ -31,6 +33,8 @@ class CountMetrics:
         self.predicted += predicted
         self.absolute_error += error
         self.exact += int(error == 0)
+        self.within_one += int(error <= 1)
+        self.within_two += int(error <= 2)
         self.overcounted += int(predicted > ground_truth)
         self.undercounted += int(predicted < ground_truth)
 
@@ -57,8 +61,12 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=ROOT / "runs/detect/carton_counter_truck/weights/best.pt",
     )
-    parser.add_argument("--dataset", type=Path, default=ROOT / "external_test/combined")
-    parser.add_argument("--confidence", type=float, default=0.25)
+    parser.add_argument(
+        "--dataset",
+        type=Path,
+        default=ROOT / "external_test/carton_loading_evaluation",
+    )
+    parser.add_argument("--confidence", type=float, default=0.45)
     parser.add_argument("--iou", type=float, default=0.30)
     parser.add_argument(
         "--example-count",
@@ -69,23 +77,10 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def source_name(stem: str) -> str:
-    """Return the source name encoded by the dataset builder."""
-    if stem.startswith("boxintake_"):
-        return "boxintake"
-    if stem.startswith("carton_loading_"):
-        return "carton_loading"
-    raise ValueError(f"Unknown source prefix: {stem}")
-
-
 def main() -> None:
-    """Run inference and print overall and per-source count accuracy."""
+    """Run inference and print Carton Loading count metrics."""
     args = parse_args()
-    metrics = {
-        "all": CountMetrics(),
-        "boxintake": CountMetrics(),
-        "carton_loading": CountMetrics(),
-    }
+    metrics = CountMetrics()
     image_results: list[ImageCountResult] = []
     yolo_class: Any = import_module("ultralytics").YOLO
     model = yolo_class(args.model)
@@ -107,18 +102,20 @@ def main() -> None:
         )
         predicted = len(result.boxes)
         image_results.append(ImageCountResult(stem, ground_truth, predicted))
-        metrics["all"].add(ground_truth, predicted)
-        metrics[source_name(stem)].add(ground_truth, predicted)
+        metrics.add(ground_truth, predicted)
 
-    for name, values in metrics.items():
-        mean_absolute_error = values.absolute_error / values.images
-        exact_accuracy = 100 * values.exact / values.images
-        print(
-            f"{name}: images={values.images} ground_truth={values.ground_truth} "
-            f"predicted={values.predicted} MAE={mean_absolute_error:.2f} "
-            f"exact={exact_accuracy:.1f}% overcounted={values.overcounted} "
-            f"undercounted={values.undercounted}"
-        )
+    mean_absolute_error = metrics.absolute_error / metrics.images
+    exact_accuracy = 100 * metrics.exact / metrics.images
+    within_one_accuracy = 100 * metrics.within_one / metrics.images
+    within_two_accuracy = 100 * metrics.within_two / metrics.images
+    print(
+        f"carton_loading: images={metrics.images} "
+        f"ground_truth={metrics.ground_truth} predicted={metrics.predicted} "
+        f"MAE={mean_absolute_error:.2f} exact={exact_accuracy:.1f}% "
+        f"within_one={within_one_accuracy:.1f}% "
+        f"within_two={within_two_accuracy:.1f}% "
+        f"overcounted={metrics.overcounted} undercounted={metrics.undercounted}"
+    )
 
     exact_examples = [item for item in image_results if item.signed_error == 0]
     overcount_examples = sorted(
