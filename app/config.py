@@ -43,7 +43,7 @@ VISUAL_REVIEW_MODEL = os.getenv("VISUAL_REVIEW_MODEL", "gemini-3.1-flash-lite")
 VISUAL_REVIEW_TIMEOUT_SECONDS = float(
     os.getenv("VISUAL_REVIEW_TIMEOUT_SECONDS", "12.0")
 )
-SERVICE_VERSION = "0.9.1"
+SERVICE_VERSION = "0.9.2"
 MODEL_NAME = os.getenv("MODEL_NAME", "carton-yolov8n-truck")
 MODEL_VERSION = os.getenv("MODEL_VERSION", "ft-truck-v1")
 SCHEMA_VERSION = "1.1"

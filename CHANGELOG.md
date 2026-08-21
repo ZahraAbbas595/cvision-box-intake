@@ -9,6 +9,14 @@ available.
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-08-21
+
+### Changed
+
+- Replaced the R&D case study with the revised, plain-language version,
+  including hosted-service behavior, consolidated outcomes, updated limitations,
+  and the current 15-section structure.
+
 ## [0.9.1] - 2026-08-20
 
 ### Changed
